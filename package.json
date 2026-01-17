@@ -1,0 +1,79 @@
+{
+  "name": "n8n-nodes-immutable",
+  "version": "1.0.0",
+  "description": "A comprehensive n8n community node for Immutable platform providing 18 resources and 50+ operations for zkEVM and Immutable X blockchain integration, gaming NFTs, marketplace operations, and Web3 gaming infrastructure.",
+  "license": "BUSL-1.1",
+  "author": {
+    "name": "Velocity BPA",
+    "email": "licensing@velobpa.com",
+    "url": "https://velobpa.com"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Velocity-BPA/n8n-nodes-immutable.git"
+  },
+  "homepage": "https://velobpa.com",
+  "keywords": [
+    "n8n",
+    "n8n-community-node-package",
+    "immutable",
+    "immutable-x",
+    "zkevm",
+    "nft",
+    "gaming",
+    "blockchain",
+    "web3",
+    "marketplace",
+    "passport",
+    "starkex",
+    "ethereum",
+    "layer2"
+  ],
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "n8n": {
+    "n8nNodesApiVersion": 1,
+    "credentials": [
+      "dist/credentials/ImmutableNetwork.credentials.js",
+      "dist/credentials/ImmutableApi.credentials.js",
+      "dist/credentials/ImmutablePassport.credentials.js"
+    ],
+    "nodes": [
+      "dist/nodes/Immutable/Immutable.node.js",
+      "dist/nodes/Immutable/ImmutableTrigger.node.js"
+    ]
+  },
+  "scripts": {
+    "build": "tsc && gulp build:icons",
+    "dev": "tsc --watch",
+    "lint": "eslint . --ext .ts",
+    "lint:fix": "eslint . --ext .ts --fix",
+    "format": "prettier --write \"**/*.ts\"",
+    "test": "jest",
+    "test:coverage": "jest --coverage",
+    "prepublishOnly": "npm run build"
+  },
+  "files": [
+    "dist"
+  ],
+  "devDependencies": {
+    "@types/jest": "^29.5.0",
+    "@types/node": "^20.10.0",
+    "@typescript-eslint/eslint-plugin": "^6.0.0",
+    "@typescript-eslint/parser": "^6.0.0",
+    "eslint": "^8.56.0",
+    "gulp": "^4.0.2",
+    "jest": "^29.7.0",
+    "n8n-workflow": "^1.22.0",
+    "prettier": "^3.2.0",
+    "ts-jest": "^29.1.0",
+    "typescript": "^5.3.0"
+  },
+  "dependencies": {},
+  "peerDependencies": {
+    "n8n-workflow": "*"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
