@@ -1,6 +1,6 @@
 # n8n-nodes-immutable
 
-> [Velocity BPA Licensing Notice]
+> **[Velocity BPA Licensing Notice]**
 >
 > This n8n node is licensed under the Business Source License 1.1 (BSL 1.1).
 >
@@ -8,53 +8,32 @@
 >
 > For licensing information, visit https://velobpa.com/licensing or contact licensing@velobpa.com.
 
----
+This n8n community node provides comprehensive integration with Immutable's NFT and gaming infrastructure platform. With 6 core resources (Assets, Collections, Minting, Orders, Trades, Users, Projects), it enables seamless automation of NFT marketplace operations, collection management, and blockchain gaming workflows on Immutable X.
 
-A comprehensive n8n community node for **Immutable platform** providing complete integration for zkEVM and Immutable X (StarkEx) blockchains. Supports gaming NFTs, marketplace operations, zero-gas minting, L1/L2 bridging, Passport authentication, and Web3 gaming infrastructure.
-
-![Immutable](https://img.shields.io/badge/Immutable-zkEVM%20%26%20IMX-blue)
-![n8n](https://img.shields.io/badge/n8n-community%20node-orange)
+![n8n Community Node](https://img.shields.io/badge/n8n-Community%20Node-blue)
 ![License](https://img.shields.io/badge/license-BSL--1.1-blue)
-![Version](https://img.shields.io/badge/version-1.0.0-brightgreen)
+![TypeScript](https://img.shields.io/badge/TypeScript-5.3-blue)
+![NFT](https://img.shields.io/badge/NFT-Marketplace-purple)
+![Blockchain](https://img.shields.io/badge/Blockchain-Gaming-green)
+![Layer 2](https://img.shields.io/badge/Layer%202-Immutable%20X-orange)
 
 ## Features
 
-### Resources (18 total)
-- **Wallet** - Balance queries, token balances, transaction history, address validation
-- **NFT** - Get NFT info, list by collection, list by owner
-- **Collection** - Get collection info, list collections, collection stats & floor price
-- **Minting** - Mint NFT, batch mint, get mint status (zero-gas minting)
-- **Order** - Get orders, list orders, listings, and bids
-- **Trade** - Get trade info, list trades
-- **Deposit** - Get deposit info, list deposits (L1→L2 bridge)
-- **Withdrawal** - Get withdrawal info, list withdrawals (L2→L1 bridge)
-- **Exchange** - List exchanges
-- **Passport** - Get user info (Immutable Passport integration)
-- **zkEVM** - Gas price, blocks, transactions, contract calls
-- **Staking** - Staking info
-- **Primary Sales** - Get/list primary sales (NFT drops)
-- **Metadata** - Get metadata schema, refresh metadata
-- **Project** - Get/list projects
-- **Crafting** - Get/list crafting recipes (gaming)
-- **Activity** - Activity feeds by user/collection
-- **Utility** - Wei/ETH conversion, address validation, network status
-
-### Trigger Node Events
-Real-time webhook monitoring for:
-- NFT events (created, transferred, burned, listed, sold, metadata updated)
-- Order events (created, cancelled, filled, bid received)
-- Trade events (executed)
-- Collection events (created, updated)
-- Bridge events (deposit completed, withdrawal completed)
-- Gaming events (item crafted, primary sale purchase)
-- All events option for comprehensive monitoring
+- **Asset Management** - Create, retrieve, update, and transfer digital assets across collections
+- **Collection Operations** - Manage NFT collections with metadata, royalties, and trading configurations  
+- **Automated Minting** - Streamline batch and individual NFT minting processes with metadata handling
+- **Order Processing** - Create, cancel, and fulfill buy/sell orders on Immutable X marketplace
+- **Trade Monitoring** - Track and analyze trading activity, volume, and market performance
+- **User Management** - Handle user profiles, wallets, and authentication workflows
+- **Project Administration** - Configure and manage gaming projects and their associated assets
+- **Real-time Data** - Access live marketplace data and blockchain state information
 
 ## Installation
 
 ### Community Nodes (Recommended)
 
 1. Open n8n
-2. Go to **Settings** > **Community Nodes**
+2. Go to **Settings** → **Community Nodes**
 3. Click **Install a community node**
 4. Enter `n8n-nodes-immutable`
 5. Click **Install**
@@ -62,238 +41,183 @@ Real-time webhook monitoring for:
 ### Manual Installation
 
 ```bash
-# Navigate to n8n custom nodes directory
-cd ~/.n8n/nodes
-
-# Clone the repository
-git clone https://github.com/Velocity-BPA/n8n-nodes-immutable.git
-cd n8n-nodes-immutable
-
-# Install dependencies and build
-npm install
-npm run build
-
-# Restart n8n
-n8n start
+cd ~/.n8n
+npm install n8n-nodes-immutable
 ```
 
 ### Development Installation
 
 ```bash
-# 1. Extract the zip file
-unzip n8n-nodes-immutable.zip
+git clone https://github.com/Velocity-BPA/n8n-nodes-immutable.git
 cd n8n-nodes-immutable
-
-# 2. Install dependencies
 npm install
-
-# 3. Build the project
 npm run build
-
-# 4. Create symlink to n8n custom nodes directory
-# For Linux/macOS:
 mkdir -p ~/.n8n/custom
 ln -s $(pwd) ~/.n8n/custom/n8n-nodes-immutable
-
-# For Windows (run as Administrator):
-# mklink /D %USERPROFILE%\.n8n\custom\n8n-nodes-immutable %CD%
-
-# 5. Restart n8n
 n8n start
 ```
 
 ## Credentials Setup
 
-### Immutable Network Credentials
-
 | Field | Description | Required |
 |-------|-------------|----------|
-| Network | zkEVM Mainnet, zkEVM Testnet, IMX Mainnet, or IMX Testnet | Yes |
-| API Key | Your Immutable API key from the Hub | Yes |
-| Private Key | For transaction signing (wallet operations) | No |
-| Mnemonic | Alternative to private key | No |
-| Stark Private Key | For Immutable X operations | No |
-
-### Getting API Keys
-
-1. Visit [Immutable Hub](https://hub.immutable.com/)
-2. Create or select a project
-3. Navigate to API Keys section
-4. Copy your API key
+| API Key | Your Immutable X API key from the developer dashboard | Yes |
+| Environment | Choose between 'sandbox' or 'mainnet' | Yes |
+| Private Key | Your Ethereum private key for signing transactions | Yes |
+| Public Key | Your Ethereum public key (auto-derived if not provided) | No |
 
 ## Resources & Operations
 
-### Wallet
+### 1. Assets
+
 | Operation | Description |
 |-----------|-------------|
-| Get Balance | Get native token balance for an address |
-| Get Token Balances | Get all token balances for an address |
-| Get Transaction History | Get transaction history for an address |
-| Validate Address | Check if an address is valid |
+| Get Asset | Retrieve details of a specific asset by token ID and contract address |
+| List Assets | Get a paginated list of assets with filtering options |
+| Create Asset | Mint a new asset to a specified wallet address |
+| Transfer Asset | Transfer an asset from one wallet to another |
+| Update Metadata | Update the metadata URI for an existing asset |
 
-### NFT
+### 2. Collections
+
 | Operation | Description |
 |-----------|-------------|
-| Get NFT | Get NFT details by collection and token ID |
-| Get NFTs by Collection | List all NFTs in a collection |
-| Get NFTs by Owner | List all NFTs owned by an address |
+| Get Collection | Retrieve collection details including stats and configuration |
+| List Collections | Get all collections with pagination and filtering |
+| Create Collection | Deploy a new NFT collection contract |
+| Update Collection | Modify collection metadata and settings |
+| Get Collection Stats | Retrieve trading statistics and analytics for a collection |
 
-### Collection
+### 3. Minting
+
 | Operation | Description |
 |-----------|-------------|
-| Get Collection | Get collection details |
-| List Collections | List all collections |
-| Get Collection Stats | Get collection statistics including floor price |
+| Mint Asset | Mint a single NFT to a specified address |
+| Batch Mint | Mint multiple NFTs in a single transaction |
+| Get Mint Status | Check the status of a pending mint operation |
+| List Mint Requests | Retrieve all mint requests for a project |
+| Cancel Mint | Cancel a pending mint request |
 
-### Minting
+### 4. Orders
+
 | Operation | Description |
 |-----------|-------------|
-| Mint NFT | Mint a single NFT (zero-gas) |
-| Batch Mint | Mint multiple NFTs at once |
-| Get Mint Status | Check the status of a mint request |
+| Create Order | Place a buy or sell order on the marketplace |
+| Get Order | Retrieve details of a specific order |
+| List Orders | Get orders with filtering by user, asset, or status |
+| Cancel Order | Cancel an active order |
+| Fill Order | Execute a trade by filling an existing order |
 
-### zkEVM
+### 5. Trades
+
 | Operation | Description |
 |-----------|-------------|
-| Get Gas Price | Get current gas price |
-| Get Block Number | Get latest block number |
-| Get Block | Get block details |
-| Get Transaction | Get transaction details |
-| Get Transaction Receipt | Get transaction receipt |
-| Call Contract | Make a read-only contract call |
+| Get Trade | Retrieve details of a completed trade |
+| List Trades | Get trading history with filtering and pagination |
+| Get Trade Stats | Retrieve trading statistics for assets or collections |
+| Export Trades | Export trade data in various formats |
 
-## Trigger Node
+### 6. Users
 
-The Immutable Trigger node allows you to receive real-time events from the Immutable platform.
+| Operation | Description |
+|-----------|-------------|
+| Get User | Retrieve user profile and wallet information |
+| List Users | Get users with filtering options |
+| Register User | Register a new user on Immutable X |
+| Update Profile | Update user profile information |
+| Get User Assets | Retrieve all assets owned by a user |
 
-### Configuration
+### 7. Projects
 
-1. Add an **Immutable Trigger** node to your workflow
-2. Select the event type to listen for
-3. Optionally add filters for collection, user, or token ID
-4. Configure your webhook URL in Immutable Hub
-
-### Supported Events
-
-- **NFT Events**: Created, Transferred, Burned, Listed, Sold, Metadata Updated
-- **Order Events**: Created, Cancelled, Filled, Bid Received
-- **Trade Events**: Executed
-- **Collection Events**: Created, Updated
-- **Bridge Events**: Deposit Completed, Withdrawal Completed
-- **Gaming Events**: Item Crafted, Primary Sale Purchase
+| Operation | Description |
+|-----------|-------------|
+| Get Project | Retrieve project configuration and details |
+| List Projects | Get all projects associated with your API key |
+| Create Project | Create a new gaming project |
+| Update Project | Modify project settings and configuration |
+| Get Project Stats | Retrieve analytics and performance metrics |
 
 ## Usage Examples
 
-### Get NFT Information
-```
-Resource: NFT
-Operation: Get NFT
-Collection Address: 0x...
-Token ID: 1234
-```
-
-### List Collection NFTs
-```
-Resource: NFT
-Operation: Get NFTs by Collection
-Collection Address: 0x...
-Limit: 50
-```
-
-### Get Wallet Balance
-```
-Resource: Wallet
-Operation: Get Balance
-Address: 0x...
+### Mint NFT to User Wallet
+```javascript
+{
+  "collection_address": "0x1234567890123456789012345678901234567890",
+  "user": "0xabcdefabcdefabcdefabcdefabcdefabcdefabcd",
+  "token_id": "12345",
+  "metadata": {
+    "name": "Epic Sword",
+    "description": "A legendary weapon forged in dragon fire",
+    "image": "https://cdn.example.com/sword.png",
+    "attributes": [
+      {"trait_type": "Rarity", "value": "Legendary"},
+      {"trait_type": "Damage", "value": 150}
+    ]
+  }
+}
 ```
 
-### Mint an NFT
-```
-Resource: Minting
-Operation: Mint NFT
-Collection Address: 0x...
-Owner Address: 0x...
-NFT Metadata: {"name": "My NFT", "description": "...", "image": "ipfs://..."}
-```
-
-### Get Gas Price
-```
-Resource: zkEVM
-Operation: Get Gas Price
-```
-
-### Convert Wei to ETH
-```
-Resource: Utility
-Operation: Convert Wei to ETH
-Value: 1000000000000000000
+### Create Marketplace Order
+```javascript
+{
+  "type": "sell",
+  "asset_id": "0x1234567890123456789012345678901234567890:12345",
+  "price": "0.5",
+  "currency": "ETH",
+  "expiry": "2024-12-31T23:59:59Z",
+  "fees": [{
+    "recipient": "0xfeerecipient123456789012345678901234567890",
+    "percentage": 2.5
+  }]
+}
 ```
 
-## Immutable Concepts
+### Get Collection Trading Stats
+```javascript
+{
+  "collection_address": "0x1234567890123456789012345678901234567890",
+  "period": "24h",
+  "metrics": ["volume", "sales_count", "floor_price", "unique_buyers"]
+}
+```
 
-### zkEVM vs Immutable X
-
-- **zkEVM**: EVM-compatible Layer 2 using zero-knowledge proofs. Supports smart contracts.
-- **Immutable X**: StarkEx-based Layer 2 optimized for NFTs. Uses STARK proofs.
-
-### Zero-Gas Minting
-
-Immutable's minting API allows gas-free NFT minting. The gas costs are covered by Immutable, making it ideal for gaming applications.
-
-### Passport
-
-Immutable Passport provides Web3 authentication with email/social login, abstracting away wallet complexity for end users.
-
-## Networks
-
-| Network | Description | Chain ID |
-|---------|-------------|----------|
-| zkEVM Mainnet | Production zkEVM network | 13371 |
-| zkEVM Testnet | Development zkEVM network | 13473 |
-| IMX Mainnet | Production Immutable X | 1 |
-| IMX Testnet | Development Immutable X | 5 |
+### Batch Transfer Assets
+```javascript
+{
+  "transfers": [
+    {
+      "token_id": "12345",
+      "from": "0xsender123456789012345678901234567890",
+      "to": "0xrecipient123456789012345678901234567890"
+    },
+    {
+      "token_id": "12346", 
+      "from": "0xsender123456789012345678901234567890",
+      "to": "0xrecipient123456789012345678901234567890"
+    }
+  ],
+  "collection_address": "0x1234567890123456789012345678901234567890"
+}
+```
 
 ## Error Handling
 
-The node includes comprehensive error handling:
-- Network connectivity errors
-- Invalid credentials
-- API rate limiting
-- Invalid parameters
-- RPC errors for zkEVM operations
-
-Use the "Continue on Fail" option in n8n to handle errors gracefully in your workflows.
-
-## Security Best Practices
-
-1. **Store credentials securely** - Use n8n's credential storage
-2. **Use testnet first** - Test workflows on testnet before mainnet
-3. **Protect private keys** - Never expose private keys in workflows
-4. **Monitor API usage** - Keep track of API rate limits
-5. **Validate inputs** - Use the address validation operation
+| Error | Description | Solution |
+|-------|-------------|----------|
+| Invalid API Key | Authentication failed with provided credentials | Verify API key is correct and has proper permissions |
+| Insufficient Balance | User lacks ETH for gas fees or trading | Ensure wallet has sufficient balance for transaction |
+| Asset Not Found | Requested asset does not exist | Verify token ID and collection address are correct |
+| Order Expired | Attempting to fill an expired marketplace order | Create a new order or check order expiration times |
+| Rate Limited | Too many API requests in short timeframe | Implement exponential backoff and respect rate limits |
+| Invalid Signature | Transaction signature verification failed | Check private key configuration and network settings |
 
 ## Development
 
 ```bash
-# Install dependencies
 npm install
-
-# Build the project
 npm run build
-
-# Run tests
 npm test
-
-# Run tests with coverage
-npm run test:coverage
-
-# Run linting
 npm run lint
-
-# Fix linting issues
-npm run lint:fix
-
-# Watch mode for development
 npm run dev
 ```
 
@@ -311,11 +235,9 @@ This n8n community node is licensed under the **Business Source License 1.1**.
 Permitted for personal, educational, research, and internal business use.
 
 ### Commercial Use
-Use of this node within any SaaS, PaaS, hosted platform, managed service,
-or paid automation offering requires a commercial license.
+Use of this node within any SaaS, PaaS, hosted platform, managed service, or paid automation offering requires a commercial license.
 
-For licensing inquiries:
-**licensing@velobpa.com**
+For licensing inquiries: **licensing@velobpa.com**
 
 See [LICENSE](LICENSE), [COMMERCIAL_LICENSE.md](COMMERCIAL_LICENSE.md), and [LICENSING_FAQ.md](LICENSING_FAQ.md) for details.
 
@@ -323,19 +245,14 @@ See [LICENSE](LICENSE), [COMMERCIAL_LICENSE.md](COMMERCIAL_LICENSE.md), and [LIC
 
 Contributions are welcome! Please ensure:
 
-1. Code follows the existing style
-2. Tests pass (`npm test`)
+1. Code follows existing style conventions
+2. All tests pass (`npm test`)
 3. Linting passes (`npm run lint`)
-4. Update documentation as needed
+4. Documentation is updated for new features
+5. Commit messages are descriptive
 
 ## Support
 
-- [GitHub Issues](https://github.com/Velocity-BPA/n8n-nodes-immutable/issues)
-- [Immutable Documentation](https://docs.immutable.com/)
-- [n8n Community](https://community.n8n.io/)
-
-## Acknowledgments
-
-- [Immutable](https://immutable.com/) for the blockchain platform
-- [n8n](https://n8n.io/) for the workflow automation platform
-- The open-source community
+- **Issues**: [GitHub Issues](https://github.com/Velocity-BPA/n8n-nodes-immutable/issues)
+- **Immutable X Documentation**: [docs.immutable.com](https://docs.immutable.com)
+- **Developer Discord**: [discord.gg/immutable](https://discord.gg/immutable)
