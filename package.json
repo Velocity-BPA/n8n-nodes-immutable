@@ -30,31 +30,24 @@
     "@typescript-eslint/eslint-plugin": "^7.0.0",
     "@typescript-eslint/parser": "^7.0.0",
     "eslint": "^8.57.0",
-    "eslint-config-prettier": "^9.0.0",
+    "eslint-config-prettier": "^9.1.0",
+    "eslint-plugin-prettier": "^5.1.0",
     "gulp": "^4.0.2",
-    "jest": "^29.5.0",
-    "prettier": "^3.0.0",
+    "gulp-rename": "^2.0.0",
+    "jest": "^29.7.0",
+    "prettier": "^3.2.0",
     "ts-jest": "^29.1.0",
-    "typescript": "^5.3.0",
-    "n8n-workflow": "*"
+    "typescript": "^5.4.0"
   },
   "peerDependencies": {
     "n8n-workflow": "*"
   },
   "keywords": [
-    "n8n-community-node-package",
     "n8n",
+    "n8n-community-node-package",
     "immutable",
     "nft",
     "blockchain",
-    "web3"
-  ],
-  "n8n": {
-    "nodes": [
-      "dist/nodes/Immutable/Immutable.node.js"
-    ],
-    "credentials": [
-      "dist/credentials/ImmutableApi.credentials.js"
-    ]
-  }
+    "zkEVM"
+  ]
 }
