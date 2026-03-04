@@ -6,7 +6,7 @@ import {
 export class ImmutableApi implements ICredentialType {
 	name = 'immutableApi';
 	displayName = 'Immutable API';
-	documentationUrl = 'https://docs.immutable.com/';
+	documentationUrl = 'https://docs.immutable.com/docs/zkEVM/api/';
 	properties: INodeProperties[] = [
 		{
 			displayName: 'API Key',
@@ -17,15 +17,15 @@ export class ImmutableApi implements ICredentialType {
 			},
 			default: '',
 			required: true,
-			description: 'API key for Immutable authentication. Create one in your Immutable Hub account.',
+			description: 'The API key for Immutable API authentication. Get your API key from Immutable Hub.',
 		},
 		{
-			displayName: 'API Base URL',
-			name: 'apiBaseUrl',
+			displayName: 'Base URL',
+			name: 'baseUrl',
 			type: 'string',
 			default: 'https://api.immutable.com',
 			required: true,
-			description: 'Base URL for the Immutable API',
+			description: 'The base URL for the Immutable API',
 		},
 	];
 }
