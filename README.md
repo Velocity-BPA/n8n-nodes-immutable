@@ -8,25 +8,25 @@
 >
 > For licensing information, visit https://velobpa.com/licensing or contact licensing@velobpa.com.
 
-This n8n community node provides comprehensive integration with Immutable's NFT and gaming infrastructure platform. With 6 core resources (Assets, Collections, Minting, Orders, Trades, Users, Projects), it enables seamless automation of NFT marketplace operations, collection management, and blockchain gaming workflows on Immutable X.
+This n8n community node provides seamless integration with Immutable's NFT marketplace and gaming platform, offering access to 7 core resources including Collections, Assets, Orders, Trades, Users, Projects, and Withdrawals with comprehensive CRUD operations and real-time marketplace data.
 
 ![n8n Community Node](https://img.shields.io/badge/n8n-Community%20Node-blue)
 ![License](https://img.shields.io/badge/license-BSL--1.1-blue)
 ![TypeScript](https://img.shields.io/badge/TypeScript-5.3-blue)
 ![NFT](https://img.shields.io/badge/NFT-Marketplace-purple)
-![Blockchain](https://img.shields.io/badge/Blockchain-Gaming-green)
-![Layer 2](https://img.shields.io/badge/Layer%202-Immutable%20X-orange)
+![Gaming](https://img.shields.io/badge/Gaming-Platform-green)
+![Ethereum](https://img.shields.io/badge/Ethereum-L2-orange)
 
 ## Features
 
-- **Asset Management** - Create, retrieve, update, and transfer digital assets across collections
-- **Collection Operations** - Manage NFT collections with metadata, royalties, and trading configurations  
-- **Automated Minting** - Streamline batch and individual NFT minting processes with metadata handling
-- **Order Processing** - Create, cancel, and fulfill buy/sell orders on Immutable X marketplace
-- **Trade Monitoring** - Track and analyze trading activity, volume, and market performance
-- **User Management** - Handle user profiles, wallets, and authentication workflows
-- **Project Administration** - Configure and manage gaming projects and their associated assets
-- **Real-time Data** - Access live marketplace data and blockchain state information
+- **Complete NFT Management** - Create, mint, transfer, and manage NFT collections and individual assets
+- **Marketplace Integration** - Access real-time order data, execute trades, and monitor marketplace activity
+- **User Account Operations** - Manage user profiles, balances, and authentication workflows
+- **Project Administration** - Handle project creation, configuration, and deployment processes
+- **Financial Operations** - Process withdrawals, track balances, and manage payment flows
+- **Advanced Filtering** - Query assets and collections with comprehensive filtering and sorting options
+- **Batch Operations** - Perform bulk operations on multiple assets and collections efficiently
+- **Real-time Data** - Access live marketplace data and transaction status updates
 
 ## Installation
 
@@ -61,142 +61,130 @@ n8n start
 
 | Field | Description | Required |
 |-------|-------------|----------|
-| API Key | Your Immutable X API key from the developer dashboard | Yes |
-| Environment | Choose between 'sandbox' or 'mainnet' | Yes |
-| Private Key | Your Ethereum private key for signing transactions | Yes |
-| Public Key | Your Ethereum public key (auto-derived if not provided) | No |
+| API Key | Your Immutable API key from the developer dashboard | Yes |
+| Environment | Select between Sandbox and Production environments | Yes |
+| Rate Limit | Optional rate limiting configuration (requests per second) | No |
 
 ## Resources & Operations
 
-### 1. Assets
+### 1. Collections
 
 | Operation | Description |
 |-----------|-------------|
-| Get Asset | Retrieve details of a specific asset by token ID and contract address |
-| List Assets | Get a paginated list of assets with filtering options |
-| Create Asset | Mint a new asset to a specified wallet address |
-| Transfer Asset | Transfer an asset from one wallet to another |
-| Update Metadata | Update the metadata URI for an existing asset |
+| Create | Create a new NFT collection with metadata and configuration |
+| Get | Retrieve collection details by collection address |
+| List | Get all collections with optional filtering and pagination |
+| Update | Update collection metadata and settings |
+| Get Stats | Retrieve collection statistics including floor price and volume |
 
-### 2. Collections
-
-| Operation | Description |
-|-----------|-------------|
-| Get Collection | Retrieve collection details including stats and configuration |
-| List Collections | Get all collections with pagination and filtering |
-| Create Collection | Deploy a new NFT collection contract |
-| Update Collection | Modify collection metadata and settings |
-| Get Collection Stats | Retrieve trading statistics and analytics for a collection |
-
-### 3. Minting
+### 2. Assets
 
 | Operation | Description |
 |-----------|-------------|
-| Mint Asset | Mint a single NFT to a specified address |
-| Batch Mint | Mint multiple NFTs in a single transaction |
-| Get Mint Status | Check the status of a pending mint operation |
-| List Mint Requests | Retrieve all mint requests for a project |
-| Cancel Mint | Cancel a pending mint request |
+| Create | Mint new NFT assets within a collection |
+| Get | Retrieve asset details by token ID and collection |
+| List | Query assets with advanced filtering by collection, owner, traits |
+| Transfer | Transfer asset ownership between users |
+| Update | Update asset metadata and properties |
+| Get History | Retrieve asset transaction and ownership history |
 
-### 4. Orders
-
-| Operation | Description |
-|-----------|-------------|
-| Create Order | Place a buy or sell order on the marketplace |
-| Get Order | Retrieve details of a specific order |
-| List Orders | Get orders with filtering by user, asset, or status |
-| Cancel Order | Cancel an active order |
-| Fill Order | Execute a trade by filling an existing order |
-
-### 5. Trades
+### 3. Orders
 
 | Operation | Description |
 |-----------|-------------|
-| Get Trade | Retrieve details of a completed trade |
-| List Trades | Get trading history with filtering and pagination |
-| Get Trade Stats | Retrieve trading statistics for assets or collections |
-| Export Trades | Export trade data in various formats |
+| Create | Create buy or sell orders for NFT assets |
+| Get | Retrieve order details by order ID |
+| List | Query orders with filtering by status, user, asset |
+| Cancel | Cancel existing orders |
+| Fill | Execute order fulfillment |
+| Get History | Retrieve order execution history |
 
-### 6. Users
-
-| Operation | Description |
-|-----------|-------------|
-| Get User | Retrieve user profile and wallet information |
-| List Users | Get users with filtering options |
-| Register User | Register a new user on Immutable X |
-| Update Profile | Update user profile information |
-| Get User Assets | Retrieve all assets owned by a user |
-
-### 7. Projects
+### 4. Trades
 
 | Operation | Description |
 |-----------|-------------|
-| Get Project | Retrieve project configuration and details |
-| List Projects | Get all projects associated with your API key |
-| Create Project | Create a new gaming project |
-| Update Project | Modify project settings and configuration |
-| Get Project Stats | Retrieve analytics and performance metrics |
+| Get | Retrieve trade details by trade ID |
+| List | Query completed trades with filtering options |
+| Get by Asset | Get all trades for a specific asset |
+| Get by User | Retrieve user's trading history |
+| Get Stats | Get trading statistics and volume data |
+
+### 5. Users
+
+| Operation | Description |
+|-----------|-------------|
+| Get | Retrieve user profile and account information |
+| List | Query users with filtering capabilities |
+| Update | Update user profile and preferences |
+| Get Assets | Retrieve all assets owned by a user |
+| Get Orders | Get user's active and historical orders |
+| Get Balance | Check user's token and ETH balances |
+
+### 6. Projects
+
+| Operation | Description |
+|-----------|-------------|
+| Create | Initialize new Immutable project |
+| Get | Retrieve project configuration and details |
+| List | Get all projects associated with the account |
+| Update | Modify project settings and configuration |
+| Deploy | Deploy project to Immutable network |
+| Get Stats | Retrieve project usage and performance metrics |
+
+### 7. Withdrawals
+
+| Operation | Description |
+|-----------|-------------|
+| Create | Initiate withdrawal of tokens or ETH |
+| Get | Retrieve withdrawal status and details |
+| List | Query withdrawal history with filtering |
+| Get Fees | Calculate withdrawal fees for different tokens |
+| Estimate Time | Get estimated completion time for withdrawals |
 
 ## Usage Examples
 
-### Mint NFT to User Wallet
 ```javascript
+// Create a new NFT collection
 {
-  "collection_address": "0x1234567890123456789012345678901234567890",
-  "user": "0xabcdefabcdefabcdefabcdefabcdefabcdefabcd",
-  "token_id": "12345",
-  "metadata": {
-    "name": "Epic Sword",
-    "description": "A legendary weapon forged in dragon fire",
-    "image": "https://cdn.example.com/sword.png",
-    "attributes": [
-      {"trait_type": "Rarity", "value": "Legendary"},
-      {"trait_type": "Damage", "value": 150}
-    ]
-  }
+  "name": "Gaming Heroes Collection",
+  "description": "Unique hero characters for blockchain gaming",
+  "contract_address": "0x1234567890abcdef",
+  "metadata_api_url": "https://api.example.com/metadata",
+  "collection_image_url": "https://images.example.com/collection.png"
 }
 ```
 
-### Create Marketplace Order
 ```javascript
+// List assets with filtering
+{
+  "collection": "0x1234567890abcdef",
+  "status": "imx",
+  "user": "0xuser123456789",
+  "order_by": "updated_at",
+  "direction": "desc",
+  "page_size": 50
+}
+```
+
+```javascript
+// Create a sell order
 {
   "type": "sell",
-  "asset_id": "0x1234567890123456789012345678901234567890:12345",
-  "price": "0.5",
-  "currency": "ETH",
-  "expiry": "2024-12-31T23:59:59Z",
-  "fees": [{
-    "recipient": "0xfeerecipient123456789012345678901234567890",
-    "percentage": 2.5
-  }]
+  "asset_id": "12345",
+  "amount_sell": "1000000000000000000",
+  "token_sell": "ETH",
+  "expiration_timestamp": 1703980800
 }
 ```
 
-### Get Collection Trading Stats
 ```javascript
+// Get user's asset portfolio
 {
-  "collection_address": "0x1234567890123456789012345678901234567890",
-  "period": "24h",
-  "metrics": ["volume", "sales_count", "floor_price", "unique_buyers"]
-}
-```
-
-### Batch Transfer Assets
-```javascript
-{
-  "transfers": [
-    {
-      "token_id": "12345",
-      "from": "0xsender123456789012345678901234567890",
-      "to": "0xrecipient123456789012345678901234567890"
-    },
-    {
-      "token_id": "12346", 
-      "from": "0xsender123456789012345678901234567890",
-      "to": "0xrecipient123456789012345678901234567890"
-    }
-  ],
-  "collection_address": "0x1234567890123456789012345678901234567890"
+  "user_address": "0xuser123456789",
+  "collection": "0x1234567890abcdef",
+  "status": "imx",
+  "order_by": "name",
+  "include_fees": true
 }
 ```
 
@@ -204,12 +192,12 @@ n8n start
 
 | Error | Description | Solution |
 |-------|-------------|----------|
-| Invalid API Key | Authentication failed with provided credentials | Verify API key is correct and has proper permissions |
-| Insufficient Balance | User lacks ETH for gas fees or trading | Ensure wallet has sufficient balance for transaction |
-| Asset Not Found | Requested asset does not exist | Verify token ID and collection address are correct |
-| Order Expired | Attempting to fill an expired marketplace order | Create a new order or check order expiration times |
-| Rate Limited | Too many API requests in short timeframe | Implement exponential backoff and respect rate limits |
-| Invalid Signature | Transaction signature verification failed | Check private key configuration and network settings |
+| 401 Unauthorized | Invalid or expired API key | Verify API key in credentials and regenerate if necessary |
+| 404 Not Found | Resource (asset, collection, order) doesn't exist | Check resource IDs and ensure they exist on the network |
+| 429 Rate Limited | Too many requests sent too quickly | Implement delays between requests or reduce request frequency |
+| 400 Bad Request | Invalid parameters or malformed request | Validate input parameters and check API documentation |
+| 500 Internal Server Error | Immutable service temporarily unavailable | Retry request after a delay or check Immutable status page |
+| Network Timeout | Request timed out waiting for response | Increase timeout settings or check network connectivity |
 
 ## Development
 
@@ -254,5 +242,5 @@ Contributions are welcome! Please ensure:
 ## Support
 
 - **Issues**: [GitHub Issues](https://github.com/Velocity-BPA/n8n-nodes-immutable/issues)
-- **Immutable X Documentation**: [docs.immutable.com](https://docs.immutable.com)
-- **Developer Discord**: [discord.gg/immutable](https://discord.gg/immutable)
+- **Immutable Documentation**: [Immutable Developer Hub](https://docs.immutable.com)
+- **Immutable Community**: [Discord Server](https://discord.gg/immutable)
