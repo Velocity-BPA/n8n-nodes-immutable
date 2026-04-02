@@ -73,212 +73,133 @@ describe('Collections Resource', () => {
   beforeEach(() => {
     mockExecuteFunctions = {
       getNodeParameter: jest.fn(),
-      getCredentials: jest.fn().mockResolvedValue({
-        apiKey: 'test-api-key',
-        baseUrl: 'https://api.immutable.com',
+      getCredentials: jest.fn().mockResolvedValue({ 
+        apiKey: 'test-key', 
+        baseUrl: 'https://api.immutable.com' 
       }),
       getInputData: jest.fn().mockReturnValue([{ json: {} }]),
       getNode: jest.fn().mockReturnValue({ name: 'Test Node' }),
       continueOnFail: jest.fn().mockReturnValue(false),
-      helpers: {
+      helpers: { 
         httpRequest: jest.fn(),
-        requestWithAuthentication: jest.fn(),
+        requestWithAuthentication: jest.fn() 
       },
     };
   });
 
-  test('should create collection successfully', async () => {
-    const mockResponse = {
-      collection_address: '0x123...',
+  it('should create a collection successfully', async () => {
+    mockExecuteFunctions.getNodeParameter
+      .mockReturnValueOnce('createCollection')
+      .mockReturnValueOnce('Test Collection')
+      .mockReturnValueOnce('Test Description')
+      .mockReturnValueOnce('https://example.com/icon.png')
+      .mockReturnValueOnce('https://example.com/metadata')
+      .mockReturnValueOnce('0x1234567890123456789012345678901234567890');
+
+    mockExecuteFunctions.helpers.httpRequest.mockResolvedValue({
+      id: 'collection-id',
       name: 'Test Collection',
-      description: 'Test Description',
-    };
-
-    mockExecuteFunctions.getNodeParameter.mockImplementation((paramName: string) => {
-      const params: any = {
-        operation: 'createCollection',
-        name: 'Test Collection',
-        description: 'Test Description',
-        collection_image_url: 'https://example.com/image.png',
-        project_id: 'project123',
-      };
-      return params[paramName];
+      contract_address: '0x1234567890123456789012345678901234567890'
     });
 
-    mockExecuteFunctions.helpers.httpRequest.mockResolvedValue(mockResponse);
+    const result = await executeCollectionsOperations.call(
+      mockExecuteFunctions,
+      [{ json: {} }]
+    );
 
-    const result = await executeCollectionsOperations.call(mockExecuteFunctions, [{ json: {} }]);
-
-    expect(result[0].json).toEqual(mockResponse);
-    expect(mockExecuteFunctions.helpers.httpRequest).toHaveBeenCalledWith({
-      method: 'POST',
-      url: 'https://api.immutable.com/v1/collections',
-      headers: {
-        'x-immutable-api-key': 'test-api-key',
-        'Content-Type': 'application/json',
-      },
-      body: {
-        name: 'Test Collection',
-        description: 'Test Description',
-        collection_image_url: 'https://example.com/image.png',
-        project_id: 'project123',
-      },
-      json: true,
-    });
+    expect(result).toHaveLength(1);
+    expect(result[0].json.name).toBe('Test Collection');
   });
 
-  test('should get collection by address successfully', async () => {
-    const mockResponse = {
-      collection_address: '0x123...',
-      name: 'Test Collection',
-      description: 'Test Description',
-    };
+  it('should get a collection successfully', async () => {
+    mockExecuteFunctions.getNodeParameter
+      .mockReturnValueOnce('getCollection')
+      .mockReturnValueOnce('0x1234567890123456789012345678901234567890');
 
-    mockExecuteFunctions.getNodeParameter.mockImplementation((paramName: string) => {
-      const params: any = {
-        operation: 'getCollection',
-        collection_address: '0x123...',
-      };
-      return params[paramName];
+    mockExecuteFunctions.helpers.httpRequest.mockResolvedValue({
+      contract_address: '0x1234567890123456789012345678901234567890',
+      name: 'Test Collection'
     });
 
-    mockExecuteFunctions.helpers.httpRequest.mockResolvedValue(mockResponse);
+    const result = await executeCollectionsOperations.call(
+      mockExecuteFunctions,
+      [{ json: {} }]
+    );
 
-    const result = await executeCollectionsOperations.call(mockExecuteFunctions, [{ json: {} }]);
-
-    expect(result[0].json).toEqual(mockResponse);
-    expect(mockExecuteFunctions.helpers.httpRequest).toHaveBeenCalledWith({
-      method: 'GET',
-      url: 'https://api.immutable.com/v1/collections/0x123...',
-      headers: {
-        'x-immutable-api-key': 'test-api-key',
-      },
-      json: true,
-    });
+    expect(result).toHaveLength(1);
+    expect(result[0].json.contract_address).toBe('0x1234567890123456789012345678901234567890');
   });
 
-  test('should list collections with pagination', async () => {
-    const mockResponse = {
+  it('should list collections successfully', async () => {
+    mockExecuteFunctions.getNodeParameter
+      .mockReturnValueOnce('listCollections')
+      .mockReturnValueOnce(20)
+      .mockReturnValueOnce('')
+      .mockReturnValueOnce('')
+      .mockReturnValueOnce('created_at');
+
+    mockExecuteFunctions.helpers.httpRequest.mockResolvedValue({
       result: [
-        { collection_address: '0x123...', name: 'Collection 1' },
-        { collection_address: '0x456...', name: 'Collection 2' },
+        { contract_address: '0x123', name: 'Collection 1' },
+        { contract_address: '0x456', name: 'Collection 2' }
       ],
-      cursor: 'next_cursor',
-    };
-
-    mockExecuteFunctions.getNodeParameter.mockImplementation((paramName: string) => {
-      const params: any = {
-        operation: 'listCollections',
-        page_size: 10,
-        cursor: 'start_cursor',
-        keyword: 'test',
-      };
-      return params[paramName];
+      cursor: null
     });
 
-    mockExecuteFunctions.helpers.httpRequest.mockResolvedValue(mockResponse);
+    const result = await executeCollectionsOperations.call(
+      mockExecuteFunctions,
+      [{ json: {} }]
+    );
 
-    const result = await executeCollectionsOperations.call(mockExecuteFunctions, [{ json: {} }]);
-
-    expect(result[0].json).toEqual(mockResponse);
-    expect(mockExecuteFunctions.helpers.httpRequest).toHaveBeenCalledWith({
-      method: 'GET',
-      url: 'https://api.immutable.com/v1/collections?page_size=10&cursor=start_cursor&keyword=test',
-      headers: {
-        'x-immutable-api-key': 'test-api-key',
-      },
-      json: true,
-    });
+    expect(result).toHaveLength(1);
+    expect(result[0].json.result).toHaveLength(2);
   });
 
-  test('should update collection successfully', async () => {
-    const mockResponse = {
-      collection_address: '0x123...',
-      name: 'Updated Collection',
-      description: 'Updated Description',
-    };
+  it('should update a collection successfully', async () => {
+    mockExecuteFunctions.getNodeParameter
+      .mockReturnValueOnce('updateCollection')
+      .mockReturnValueOnce('0x1234567890123456789012345678901234567890')
+      .mockReturnValueOnce('Updated Collection Name')
+      .mockReturnValueOnce('Updated Description')
+      .mockReturnValueOnce('https://example.com/new-icon.png');
 
-    mockExecuteFunctions.getNodeParameter.mockImplementation((paramName: string) => {
-      const params: any = {
-        operation: 'updateCollection',
-        collection_address: '0x123...',
-        name: 'Updated Collection',
-        description: 'Updated Description',
-        collection_image_url: 'https://example.com/updated-image.png',
-      };
-      return params[paramName];
+    mockExecuteFunctions.helpers.httpRequest.mockResolvedValue({
+      contract_address: '0x1234567890123456789012345678901234567890',
+      name: 'Updated Collection Name',
+      description: 'Updated Description'
     });
 
-    mockExecuteFunctions.helpers.httpRequest.mockResolvedValue(mockResponse);
+    const result = await executeCollectionsOperations.call(
+      mockExecuteFunctions,
+      [{ json: {} }]
+    );
 
-    const result = await executeCollectionsOperations.call(mockExecuteFunctions, [{ json: {} }]);
-
-    expect(result[0].json).toEqual(mockResponse);
-    expect(mockExecuteFunctions.helpers.httpRequest).toHaveBeenCalledWith({
-      method: 'PUT',
-      url: 'https://api.immutable.com/v1/collections/0x123...',
-      headers: {
-        'x-immutable-api-key': 'test-api-key',
-        'Content-Type': 'application/json',
-      },
-      body: {
-        name: 'Updated Collection',
-        description: 'Updated Description',
-        collection_image_url: 'https://example.com/updated-image.png',
-      },
-      json: true,
-    });
+    expect(result).toHaveLength(1);
+    expect(result[0].json.name).toBe('Updated Collection Name');
   });
 
-  test('should get collection NFTs successfully', async () => {
-    const mockResponse = {
-      result: [
-        { token_id: '1', name: 'NFT 1' },
-        { token_id: '2', name: 'NFT 2' },
-      ],
-      cursor: 'next_cursor',
-    };
-
-    mockExecuteFunctions.getNodeParameter.mockImplementation((paramName: string) => {
-      const params: any = {
-        operation: 'getCollectionNFTs',
-        collection_address: '0x123...',
-        page_size: 20,
-        cursor: 'start_cursor',
-      };
-      return params[paramName];
-    });
-
-    mockExecuteFunctions.helpers.httpRequest.mockResolvedValue(mockResponse);
-
-    const result = await executeCollectionsOperations.call(mockExecuteFunctions, [{ json: {} }]);
-
-    expect(result[0].json).toEqual(mockResponse);
-    expect(mockExecuteFunctions.helpers.httpRequest).toHaveBeenCalledWith({
-      method: 'GET',
-      url: 'https://api.immutable.com/v1/collections/0x123.../nfts?page_size=20&cursor=start_cursor',
-      headers: {
-        'x-immutable-api-key': 'test-api-key',
-      },
-      json: true,
-    });
-  });
-
-  test('should handle API errors gracefully', async () => {
-    mockExecuteFunctions.getNodeParameter.mockImplementation((paramName: string) => {
-      const params: any = {
-        operation: 'getCollection',
-        collection_address: '0x123...',
-      };
-      return params[paramName];
-    });
-
-    mockExecuteFunctions.helpers.httpRequest.mockRejectedValue(new Error('API Error'));
+  it('should handle errors gracefully when continueOnFail is true', async () => {
+    mockExecuteFunctions.getNodeParameter.mockReturnValueOnce('getCollection');
     mockExecuteFunctions.continueOnFail.mockReturnValue(true);
+    mockExecuteFunctions.helpers.httpRequest.mockRejectedValue(new Error('API Error'));
 
-    const result = await executeCollectionsOperations.call(mockExecuteFunctions, [{ json: {} }]);
+    const result = await executeCollectionsOperations.call(
+      mockExecuteFunctions,
+      [{ json: {} }]
+    );
 
-    expect(result[0].json).toEqual({ error: 'API Error' });
+    expect(result).toHaveLength(1);
+    expect(result[0].json.error).toBe('API Error');
+  });
+
+  it('should throw error when continueOnFail is false', async () => {
+    mockExecuteFunctions.getNodeParameter.mockReturnValueOnce('getCollection');
+    mockExecuteFunctions.continueOnFail.mockReturnValue(false);
+    mockExecuteFunctions.helpers.httpRequest.mockRejectedValue(new Error('API Error'));
+
+    await expect(
+      executeCollectionsOperations.call(mockExecuteFunctions, [{ json: {} }])
+    ).rejects.toThrow('API Error');
   });
 });
 
@@ -288,519 +209,291 @@ describe('Assets Resource', () => {
   beforeEach(() => {
     mockExecuteFunctions = {
       getNodeParameter: jest.fn(),
-      getCredentials: jest.fn().mockResolvedValue({
-        apiKey: 'test-api-key',
-        baseUrl: 'https://api.immutable.com',
+      getCredentials: jest.fn().mockResolvedValue({ 
+        apiKey: 'test-key', 
+        baseUrl: 'https://api.immutable.com/v1' 
       }),
       getInputData: jest.fn().mockReturnValue([{ json: {} }]),
       getNode: jest.fn().mockReturnValue({ name: 'Test Node' }),
       continueOnFail: jest.fn().mockReturnValue(false),
-      helpers: {
+      helpers: { 
         httpRequest: jest.fn(),
-        requestWithAuthentication: jest.fn(),
+        requestWithAuthentication: jest.fn() 
       },
     };
   });
 
-  describe('mintAsset', () => {
-    it('should mint asset successfully', async () => {
-      const mockResponse = {
-        transaction_id: 'tx123',
-        asset_id: 'asset123',
-        status: 'pending',
-      };
+  describe('mintAsset operation', () => {
+    it('should mint an asset successfully', async () => {
+      mockExecuteFunctions.getNodeParameter
+        .mockReturnValueOnce('mintAsset')
+        .mockReturnValueOnce('0x123')
+        .mockReturnValueOnce('token123')
+        .mockReturnValueOnce('blueprint456')
+        .mockReturnValueOnce('[]');
 
-      mockExecuteFunctions.getNodeParameter.mockImplementation((param: string) => {
-        switch (param) {
-          case 'operation': return 'mintAsset';
-          case 'environment': return 'sandbox';
-          case 'collection_address': return '0x123';
-          case 'to': return '0x456';
-          case 'token_id': return '1';
-          case 'blueprint': return 'blueprint1';
-          case 'metadata': return { name: 'Test NFT' };
-          default: return '';
-        }
-      });
-
+      const mockResponse = { id: 'asset123', status: 'success' };
       mockExecuteFunctions.helpers.httpRequest.mockResolvedValue(mockResponse);
 
       const result = await executeAssetsOperations.call(mockExecuteFunctions, [{ json: {} }]);
 
-      expect(result).toHaveLength(1);
-      expect(result[0].json).toEqual(mockResponse);
+      expect(result).toEqual([{ json: mockResponse, pairedItem: { item: 0 } }]);
       expect(mockExecuteFunctions.helpers.httpRequest).toHaveBeenCalledWith({
         method: 'POST',
-        url: 'https://api.sandbox.immutable.com/v1/assets',
+        url: 'https://api.immutable.com/v1/assets',
         headers: {
-          'Authorization': 'Bearer test-api-key',
+          'x-api-key': 'test-key',
           'Content-Type': 'application/json',
         },
         body: {
-          collection_address: '0x123',
-          to: '0x456',
-          token_id: '1',
-          metadata: { name: 'Test NFT' },
-          blueprint: 'blueprint1',
+          user: '0x123',
+          token_id: 'token123',
+          blueprint: 'blueprint456',
         },
         json: true,
       });
     });
 
     it('should handle mint asset error', async () => {
-      mockExecuteFunctions.getNodeParameter.mockImplementation((param: string) => {
-        switch (param) {
-          case 'operation': return 'mintAsset';
-          case 'environment': return 'sandbox';
-          default: return '';
-        }
-      });
-
-      const error = new Error('API Error');
-      mockExecuteFunctions.helpers.httpRequest.mockRejectedValue(error);
+      mockExecuteFunctions.getNodeParameter.mockReturnValueOnce('mintAsset');
+      mockExecuteFunctions.helpers.httpRequest.mockRejectedValue(new Error('API Error'));
 
       await expect(executeAssetsOperations.call(mockExecuteFunctions, [{ json: {} }])).rejects.toThrow('API Error');
     });
   });
 
-  describe('getAsset', () => {
+  describe('getAsset operation', () => {
     it('should get asset successfully', async () => {
-      const mockResponse = {
-        token_id: '1',
-        token_address: '0x123',
-        name: 'Test NFT',
-        metadata: { name: 'Test NFT' },
-      };
+      mockExecuteFunctions.getNodeParameter
+        .mockReturnValueOnce('getAsset')
+        .mockReturnValueOnce('0xtoken123')
+        .mockReturnValueOnce('456')
+        .mockReturnValueOnce(true);
 
-      mockExecuteFunctions.getNodeParameter.mockImplementation((param: string) => {
-        switch (param) {
-          case 'operation': return 'getAsset';
-          case 'environment': return 'mainnet';
-          case 'token_address': return '0x123';
-          case 'token_id': return '1';
-          default: return '';
-        }
-      });
-
+      const mockResponse = { id: 'asset456', name: 'Test Asset' };
       mockExecuteFunctions.helpers.httpRequest.mockResolvedValue(mockResponse);
 
       const result = await executeAssetsOperations.call(mockExecuteFunctions, [{ json: {} }]);
 
-      expect(result).toHaveLength(1);
-      expect(result[0].json).toEqual(mockResponse);
+      expect(result).toEqual([{ json: mockResponse, pairedItem: { item: 0 } }]);
       expect(mockExecuteFunctions.helpers.httpRequest).toHaveBeenCalledWith({
         method: 'GET',
-        url: 'https://api.immutable.com/v1/assets/0x123/1',
+        url: 'https://api.immutable.com/v1/assets/0xtoken123/456?include_fees=true',
         headers: {
-          'Authorization': 'Bearer test-api-key',
+          'x-api-key': 'test-key',
         },
         json: true,
       });
     });
   });
 
-  describe('listAssets', () => {
-    it('should list assets successfully with filters', async () => {
-      const mockResponse = {
-        result: [
-          { token_id: '1', name: 'NFT 1' },
-          { token_id: '2', name: 'NFT 2' },
-        ],
-        cursor: 'next_cursor',
-      };
+  describe('listAssets operation', () => {
+    it('should list assets successfully', async () => {
+      mockExecuteFunctions.getNodeParameter
+        .mockReturnValueOnce('listAssets')
+        .mockReturnValueOnce(25)
+        .mockReturnValueOnce('')
+        .mockReturnValueOnce('0x123')
+        .mockReturnValueOnce('imx')
+        .mockReturnValueOnce('TestAsset')
+        .mockReturnValueOnce('{}')
+        .mockReturnValueOnce('name')
+        .mockReturnValueOnce('asc')
+        .mockReturnValueOnce('')
+        .mockReturnValueOnce('');
 
-      mockExecuteFunctions.getNodeParameter.mockImplementation((param: string) => {
-        switch (param) {
-          case 'operation': return 'listAssets';
-          case 'environment': return 'sandbox';
-          case 'collection': return '0x123';
-          case 'owner': return '0x456';
-          case 'page_size': return 50;
-          case 'cursor': return '';
-          case 'status': return 'active';
-          default: return '';
-        }
-      });
-
+      const mockResponse = { result: [], cursor: null };
       mockExecuteFunctions.helpers.httpRequest.mockResolvedValue(mockResponse);
 
       const result = await executeAssetsOperations.call(mockExecuteFunctions, [{ json: {} }]);
 
-      expect(result).toHaveLength(1);
-      expect(result[0].json).toEqual(mockResponse);
-      expect(mockExecuteFunctions.helpers.httpRequest).toHaveBeenCalledWith({
-        method: 'GET',
-        url: 'https://api.sandbox.immutable.com/v1/assets?collection=0x123&owner=0x456&page_size=50&status=active',
-        headers: {
-          'Authorization': 'Bearer test-api-key',
-        },
-        json: true,
-      });
+      expect(result).toEqual([{ json: mockResponse, pairedItem: { item: 0 } }]);
+      expect(mockExecuteFunctions.helpers.httpRequest).toHaveBeenCalledWith(
+        expect.objectContaining({
+          method: 'GET',
+          url: expect.stringContaining('/assets?'),
+          headers: { 'x-api-key': 'test-key' },
+        })
+      );
     });
   });
 
-  describe('updateAsset', () => {
+  describe('updateAsset operation', () => {
     it('should update asset successfully', async () => {
-      const mockResponse = {
-        token_id: '1',
-        token_address: '0x123',
-        metadata: { name: 'Updated NFT' },
-      };
+      mockExecuteFunctions.getNodeParameter
+        .mockReturnValueOnce('updateAsset')
+        .mockReturnValueOnce('0xtoken123')
+        .mockReturnValueOnce('456')
+        .mockReturnValueOnce('{"name": "Updated Asset"}');
 
-      mockExecuteFunctions.getNodeParameter.mockImplementation((param: string) => {
-        switch (param) {
-          case 'operation': return 'updateAsset';
-          case 'environment': return 'sandbox';
-          case 'token_address': return '0x123';
-          case 'token_id': return '1';
-          case 'metadata': return { name: 'Updated NFT' };
-          default: return '';
-        }
-      });
-
+      const mockResponse = { success: true };
       mockExecuteFunctions.helpers.httpRequest.mockResolvedValue(mockResponse);
 
       const result = await executeAssetsOperations.call(mockExecuteFunctions, [{ json: {} }]);
 
-      expect(result).toHaveLength(1);
-      expect(result[0].json).toEqual(mockResponse);
+      expect(result).toEqual([{ json: mockResponse, pairedItem: { item: 0 } }]);
       expect(mockExecuteFunctions.helpers.httpRequest).toHaveBeenCalledWith({
         method: 'PUT',
-        url: 'https://api.sandbox.immutable.com/v1/assets/0x123/1',
+        url: 'https://api.immutable.com/v1/assets/0xtoken123/456',
         headers: {
-          'Authorization': 'Bearer test-api-key',
+          'x-api-key': 'test-key',
           'Content-Type': 'application/json',
         },
         body: {
-          metadata: { name: 'Updated NFT' },
+          metadata: { name: 'Updated Asset' },
         },
         json: true,
       });
-    });
-  });
-
-  describe('transferAsset', () => {
-    it('should transfer asset successfully', async () => {
-      const mockResponse = {
-        transaction_id: 'tx456',
-        status: 'pending',
-      };
-
-      mockExecuteFunctions.getNodeParameter.mockImplementation((param: string) => {
-        switch (param) {
-          case 'operation': return 'transferAsset';
-          case 'environment': return 'mainnet';
-          case 'token_address': return '0x123';
-          case 'token_id': return '1';
-          case 'receiver': return '0x789';
-          default: return '';
-        }
-      });
-
-      mockExecuteFunctions.helpers.httpRequest.mockResolvedValue(mockResponse);
-
-      const result = await executeAssetsOperations.call(mockExecuteFunctions, [{ json: {} }]);
-
-      expect(result).toHaveLength(1);
-      expect(result[0].json).toEqual(mockResponse);
-      expect(mockExecuteFunctions.helpers.httpRequest).toHaveBeenCalledWith({
-        method: 'POST',
-        url: 'https://api.immutable.com/v1/assets/0x123/1/transfer',
-        headers: {
-          'Authorization': 'Bearer test-api-key',
-          'Content-Type': 'application/json',
-        },
-        body: {
-          receiver: '0x789',
-        },
-        json: true,
-      });
-    });
-  });
-
-  describe('error handling', () => {
-    it('should continue on fail when enabled', async () => {
-      mockExecuteFunctions.continueOnFail.mockReturnValue(true);
-      mockExecuteFunctions.getNodeParameter.mockImplementation((param: string) => {
-        if (param === 'operation') return 'getAsset';
-        if (param === 'environment') return 'sandbox';
-        return '';
-      });
-
-      const error = new Error('Network error');
-      mockExecuteFunctions.helpers.httpRequest.mockRejectedValue(error);
-
-      const result = await executeAssetsOperations.call(mockExecuteFunctions, [{ json: {} }]);
-
-      expect(result).toHaveLength(1);
-      expect(result[0].json.error).toBe('Network error');
-    });
-
-    it('should throw error for unknown operation', async () => {
-      mockExecuteFunctions.getNodeParameter.mockImplementation((param: string) => {
-        if (param === 'operation') return 'unknownOperation';
-        return '';
-      });
-
-      await expect(executeAssetsOperations.call(mockExecuteFunctions, [{ json: {} }])).rejects.toThrow('Unknown operation: unknownOperation');
     });
   });
 });
 
 describe('Orders Resource', () => {
-  let mockExecuteFunctions: any;
+	let mockExecuteFunctions: any;
 
-  beforeEach(() => {
-    mockExecuteFunctions = {
-      getNodeParameter: jest.fn(),
-      getCredentials: jest.fn().mockResolvedValue({
-        apiKey: 'test-api-key',
-        baseUrl: 'https://api.immutable.com',
-      }),
-      getInputData: jest.fn().mockReturnValue([{ json: {} }]),
-      getNode: jest.fn().mockReturnValue({ name: 'Test Node' }),
-      continueOnFail: jest.fn().mockReturnValue(false),
-      helpers: {
-        httpRequest: jest.fn(),
-        requestWithAuthentication: jest.fn(),
-      },
-    };
-  });
+	beforeEach(() => {
+		mockExecuteFunctions = {
+			getNodeParameter: jest.fn(),
+			getCredentials: jest.fn().mockResolvedValue({ 
+				apiKey: 'test-key', 
+				baseUrl: 'https://api.immutable.com/v1' 
+			}),
+			getInputData: jest.fn().mockReturnValue([{ json: {} }]),
+			getNode: jest.fn().mockReturnValue({ name: 'Test Node' }),
+			continueOnFail: jest.fn().mockReturnValue(false),
+			helpers: { 
+				httpRequest: jest.fn(), 
+				requestWithAuthentication: jest.fn() 
+			},
+		};
+	});
 
-  describe('createOrder', () => {
-    it('should create a buy order successfully', async () => {
-      mockExecuteFunctions.getNodeParameter.mockImplementation((param: string) => {
-        switch (param) {
-          case 'operation': return 'createOrder';
-          case 'environment': return 'sandbox';
-          case 'type': return 'buy';
-          case 'data': return '{"token_id": "123", "amount": "1000"}';
-          case 'fees': return '[]';
-          case 'timestamp': return 1640995200;
-          default: return '';
-        }
-      });
+	describe('createOrder', () => {
+		it('should create order successfully', async () => {
+			const mockResponse = { id: 'order123', status: 'active' };
+			mockExecuteFunctions.helpers.httpRequest.mockResolvedValue(mockResponse);
+			mockExecuteFunctions.getNodeParameter
+				.mockReturnValueOnce('createOrder')
+				.mockReturnValueOnce('0x123')
+				.mockReturnValueOnce('0xtoken1')
+				.mockReturnValueOnce('1000')
+				.mockReturnValueOnce('0xtoken2')
+				.mockReturnValueOnce('500')
+				.mockReturnValueOnce(1640995200);
 
-      const mockResponse = {
-        order_id: 'order_123',
-        status: 'active',
-        type: 'buy',
-      };
+			const result = await executeOrdersOperations.call(mockExecuteFunctions, [{ json: {} }]);
 
-      mockExecuteFunctions.helpers.httpRequest.mockResolvedValue(mockResponse);
+			expect(result).toEqual([{ json: mockResponse, pairedItem: { item: 0 } }]);
+			expect(mockExecuteFunctions.helpers.httpRequest).toHaveBeenCalledWith({
+				method: 'POST',
+				url: 'https://api.immutable.com/v1/orders',
+				headers: {
+					Authorization: 'Bearer test-key',
+					'Content-Type': 'application/json',
+				},
+				body: {
+					user: '0x123',
+					token_buy: '0xtoken1',
+					amount_buy: '1000',
+					token_sell: '0xtoken2',
+					amount_sell: '500',
+					expiration_timestamp: 1640995200,
+				},
+				json: true,
+			});
+		});
 
-      const result = await executeOrdersOperations.call(mockExecuteFunctions, [{ json: {} }]);
+		it('should handle createOrder error', async () => {
+			mockExecuteFunctions.helpers.httpRequest.mockRejectedValue(new Error('API Error'));
+			mockExecuteFunctions.getNodeParameter.mockReturnValueOnce('createOrder');
+			mockExecuteFunctions.continueOnFail.mockReturnValue(true);
 
-      expect(result).toHaveLength(1);
-      expect(result[0].json).toEqual(mockResponse);
-      expect(mockExecuteFunctions.helpers.httpRequest).toHaveBeenCalledWith({
-        method: 'POST',
-        url: 'https://api.sandbox.immutable.com/v1/orders',
-        headers: {
-          'Authorization': 'Bearer test-api-key',
-          'Content-Type': 'application/json',
-        },
-        body: {
-          type: 'buy',
-          data: { token_id: '123', amount: '1000' },
-          fees: [],
-          timestamp: 1640995200,
-        },
-        json: true,
-      });
-    });
-  });
+			const result = await executeOrdersOperations.call(mockExecuteFunctions, [{ json: {} }]);
 
-  describe('getOrder', () => {
-    it('should get order details successfully', async () => {
-      mockExecuteFunctions.getNodeParameter.mockImplementation((param: string) => {
-        switch (param) {
-          case 'operation': return 'getOrder';
-          case 'environment': return 'mainnet';
-          case 'orderId': return 'order_123';
-          default: return '';
-        }
-      });
+			expect(result).toEqual([{ json: { error: 'API Error' }, pairedItem: { item: 0 } }]);
+		});
+	});
 
-      const mockResponse = {
-        order_id: 'order_123',
-        status: 'filled',
-        type: 'buy',
-        amount: '1000',
-      };
+	describe('getOrder', () => {
+		it('should get order successfully', async () => {
+			const mockResponse = { id: 'order123', status: 'active' };
+			mockExecuteFunctions.helpers.httpRequest.mockResolvedValue(mockResponse);
+			mockExecuteFunctions.getNodeParameter
+				.mockReturnValueOnce('getOrder')
+				.mockReturnValueOnce('order123')
+				.mockReturnValueOnce(true)
+				.mockReturnValueOnce('1,2,3');
 
-      mockExecuteFunctions.helpers.httpRequest.mockResolvedValue(mockResponse);
+			const result = await executeOrdersOperations.call(mockExecuteFunctions, [{ json: {} }]);
 
-      const result = await executeOrdersOperations.call(mockExecuteFunctions, [{ json: {} }]);
+			expect(result).toEqual([{ json: mockResponse, pairedItem: { item: 0 } }]);
+		});
 
-      expect(result).toHaveLength(1);
-      expect(result[0].json).toEqual(mockResponse);
-      expect(mockExecuteFunctions.helpers.httpRequest).toHaveBeenCalledWith({
-        method: 'GET',
-        url: 'https://api.immutable.com/v1/orders/order_123',
-        headers: {
-          'Authorization': 'Bearer test-api-key',
-        },
-        json: true,
-      });
-    });
-  });
+		it('should handle getOrder error', async () => {
+			mockExecuteFunctions.helpers.httpRequest.mockRejectedValue(new Error('Order not found'));
+			mockExecuteFunctions.getNodeParameter.mockReturnValueOnce('getOrder');
+			mockExecuteFunctions.continueOnFail.mockReturnValue(true);
 
-  describe('listOrders', () => {
-    it('should list orders with filters successfully', async () => {
-      mockExecuteFunctions.getNodeParameter.mockImplementation((param: string) => {
-        switch (param) {
-          case 'operation': return 'listOrders';
-          case 'environment': return 'sandbox';
-          case 'status': return 'active';
-          case 'user': return '0x123...';
-          case 'sellTokenAddress': return '';
-          case 'buyTokenAddress': return '';
-          case 'pageSize': return 50;
-          case 'cursor': return '';
-          default: return '';
-        }
-      });
+			const result = await executeOrdersOperations.call(mockExecuteFunctions, [{ json: {} }]);
 
-      const mockResponse = {
-        result: [
-          { order_id: 'order_1', status: 'active' },
-          { order_id: 'order_2', status: 'active' },
-        ],
-        cursor: 'next_cursor',
-      };
+			expect(result).toEqual([{ json: { error: 'Order not found' }, pairedItem: { item: 0 } }]);
+		});
+	});
 
-      mockExecuteFunctions.helpers.httpRequest.mockResolvedValue(mockResponse);
+	describe('listOrders', () => {
+		it('should list orders successfully', async () => {
+			const mockResponse = { result: [{ id: 'order1' }, { id: 'order2' }], cursor: 'next-cursor' };
+			mockExecuteFunctions.helpers.httpRequest.mockResolvedValue(mockResponse);
+			mockExecuteFunctions.getNodeParameter
+				.mockReturnValueOnce('listOrders');
 
-      const result = await executeOrdersOperations.call(mockExecuteFunctions, [{ json: {} }]);
+			const result = await executeOrdersOperations.call(mockExecuteFunctions, [{ json: {} }]);
 
-      expect(result).toHaveLength(1);
-      expect(result[0].json).toEqual(mockResponse);
-      expect(mockExecuteFunctions.helpers.httpRequest).toHaveBeenCalledWith({
-        method: 'GET',
-        url: 'https://api.sandbox.immutable.com/v1/orders?status=active&user=0x123...&page_size=50',
-        headers: {
-          'Authorization': 'Bearer test-api-key',
-        },
-        json: true,
-      });
-    });
-  });
+			expect(result).toEqual([{ json: mockResponse, pairedItem: { item: 0 } }]);
+		});
 
-  describe('updateOrder', () => {
-    it('should update order status successfully', async () => {
-      mockExecuteFunctions.getNodeParameter.mockImplementation((param: string) => {
-        switch (param) {
-          case 'operation': return 'updateOrder';
-          case 'environment': return 'sandbox';
-          case 'orderId': return 'order_123';
-          case 'status': return 'cancelled';
-          default: return '';
-        }
-      });
+		it('should handle listOrders error', async () => {
+			mockExecuteFunctions.helpers.httpRequest.mockRejectedValue(new Error('List error'));
+			mockExecuteFunctions.getNodeParameter.mockReturnValueOnce('listOrders');
+			mockExecuteFunctions.continueOnFail.mockReturnValue(true);
 
-      const mockResponse = {
-        order_id: 'order_123',
-        status: 'cancelled',
-      };
+			const result = await executeOrdersOperations.call(mockExecuteFunctions, [{ json: {} }]);
 
-      mockExecuteFunctions.helpers.httpRequest.mockResolvedValue(mockResponse);
+			expect(result).toEqual([{ json: { error: 'List error' }, pairedItem: { item: 0 } }]);
+		});
+	});
 
-      const result = await executeOrdersOperations.call(mockExecuteFunctions, [{ json: {} }]);
+	describe('cancelOrder', () => {
+		it('should cancel order successfully', async () => {
+			const mockResponse = { id: 'order123', status: 'cancelled' };
+			mockExecuteFunctions.helpers.httpRequest.mockResolvedValue(mockResponse);
+			mockExecuteFunctions.getNodeParameter
+				.mockReturnValueOnce('cancelOrder')
+				.mockReturnValueOnce('order123');
 
-      expect(result).toHaveLength(1);
-      expect(result[0].json).toEqual(mockResponse);
-      expect(mockExecuteFunctions.helpers.httpRequest).toHaveBeenCalledWith({
-        method: 'PUT',
-        url: 'https://api.sandbox.immutable.com/v1/orders/order_123',
-        headers: {
-          'Authorization': 'Bearer test-api-key',
-          'Content-Type': 'application/json',
-        },
-        body: {
-          status: 'cancelled',
-        },
-        json: true,
-      });
-    });
-  });
+			const result = await executeOrdersOperations.call(mockExecuteFunctions, [{ json: {} }]);
 
-  describe('cancelOrder', () => {
-    it('should cancel order successfully', async () => {
-      mockExecuteFunctions.getNodeParameter.mockImplementation((param: string) => {
-        switch (param) {
-          case 'operation': return 'cancelOrder';
-          case 'environment': return 'sandbox';
-          case 'orderId': return 'order_123';
-          default: return '';
-        }
-      });
+			expect(result).toEqual([{ json: mockResponse, pairedItem: { item: 0 } }]);
+			expect(mockExecuteFunctions.helpers.httpRequest).toHaveBeenCalledWith({
+				method: 'DELETE',
+				url: 'https://api.immutable.com/v1/orders/order123',
+				headers: {
+					Authorization: 'Bearer test-key',
+				},
+				json: true,
+			});
+		});
 
-      const mockResponse = {
-        order_id: 'order_123',
-        status: 'cancelled',
-      };
+		it('should handle cancelOrder error', async () => {
+			mockExecuteFunctions.helpers.httpRequest.mockRejectedValue(new Error('Cancel failed'));
+			mockExecuteFunctions.getNodeParameter.mockReturnValueOnce('cancelOrder');
+			mockExecuteFunctions.continueOnFail.mockReturnValue(true);
 
-      mockExecuteFunctions.helpers.httpRequest.mockResolvedValue(mockResponse);
+			const result = await executeOrdersOperations.call(mockExecuteFunctions, [{ json: {} }]);
 
-      const result = await executeOrdersOperations.call(mockExecuteFunctions, [{ json: {} }]);
-
-      expect(result).toHaveLength(1);
-      expect(result[0].json).toEqual(mockResponse);
-      expect(mockExecuteFunctions.helpers.httpRequest).toHaveBeenCalledWith({
-        method: 'DELETE',
-        url: 'https://api.sandbox.immutable.com/v1/orders/order_123',
-        headers: {
-          'Authorization': 'Bearer test-api-key',
-        },
-        json: true,
-      });
-    });
-  });
-
-  describe('error handling', () => {
-    it('should handle API errors properly', async () => {
-      mockExecuteFunctions.getNodeParameter.mockImplementation((param: string) => {
-        switch (param) {
-          case 'operation': return 'getOrder';
-          case 'environment': return 'sandbox';
-          case 'orderId': return 'invalid_order';
-          default: return '';
-        }
-      });
-
-      const apiError = {
-        response: {
-          body: { message: 'Order not found' },
-        },
-      };
-
-      mockExecuteFunctions.helpers.httpRequest.mockRejectedValue(apiError);
-
-      await expect(
-        executeOrdersOperations.call(mockExecuteFunctions, [{ json: {} }])
-      ).rejects.toThrow();
-    });
-
-    it('should continue on fail when configured', async () => {
-      mockExecuteFunctions.continueOnFail.mockReturnValue(true);
-      mockExecuteFunctions.getNodeParameter.mockImplementation((param: string) => {
-        switch (param) {
-          case 'operation': return 'getOrder';
-          case 'environment': return 'sandbox';
-          case 'orderId': return 'invalid_order';
-          default: return '';
-        }
-      });
-
-      mockExecuteFunctions.helpers.httpRequest.mockRejectedValue(new Error('API Error'));
-
-      const result = await executeOrdersOperations.call(mockExecuteFunctions, [{ json: {} }]);
-
-      expect(result).toHaveLength(1);
-      expect(result[0].json.error).toBe('API Error');
-    });
-  });
+			expect(result).toEqual([{ json: { error: 'Cancel failed' }, pairedItem: { item: 0 } }]);
+		});
+	});
 });
 
 describe('Trades Resource', () => {
@@ -809,864 +502,603 @@ describe('Trades Resource', () => {
   beforeEach(() => {
     mockExecuteFunctions = {
       getNodeParameter: jest.fn(),
-      getCredentials: jest.fn().mockResolvedValue({
-        apiKey: 'test-api-key',
-        baseUrl: 'https://api.immutable.com',
+      getCredentials: jest.fn().mockResolvedValue({ 
+        apiKey: 'test-key', 
+        baseUrl: 'https://api.immutable.com/v1' 
       }),
       getInputData: jest.fn().mockReturnValue([{ json: {} }]),
       getNode: jest.fn().mockReturnValue({ name: 'Test Node' }),
       continueOnFail: jest.fn().mockReturnValue(false),
-      helpers: {
+      helpers: { 
         httpRequest: jest.fn(),
-        requestWithAuthentication: jest.fn(),
+        requestWithAuthentication: jest.fn() 
       },
     };
   });
 
-  describe('createTrade', () => {
-    it('should create a trade successfully', async () => {
-      const mockResponse = {
-        trade_id: '123',
-        status: 'completed',
-        order_id: 'order-456',
-      };
+  it('should create a trade successfully', async () => {
+    mockExecuteFunctions.getNodeParameter
+      .mockReturnValueOnce('createTrade')
+      .mockReturnValueOnce('order123')
+      .mockReturnValueOnce('0x1234567890123456789012345678901234567890')
+      .mockReturnValueOnce({ fee_percentage: 2.5 });
 
-      mockExecuteFunctions.getNodeParameter.mockImplementation((param: string) => {
-        switch (param) {
-          case 'operation': return 'createTrade';
-          case 'orderId': return 'order-456';
-          case 'fees': return 100;
-          case 'timestamp': return '2023-01-01T00:00:00Z';
-          default: return undefined;
-        }
-      });
-
-      mockExecuteFunctions.helpers.httpRequest.mockResolvedValue(mockResponse);
-
-      const result = await executeTradesOperations.call(mockExecuteFunctions, [{ json: {} }]);
-
-      expect(mockExecuteFunctions.helpers.httpRequest).toHaveBeenCalledWith({
-        method: 'POST',
-        url: 'https://api.immutable.com/v1/trades',
-        headers: {
-          'Authorization': 'Bearer test-api-key',
-          'Content-Type': 'application/json',
-        },
-        body: {
-          order_id: 'order-456',
-          fees: 100,
-          timestamp: '2023-01-01T00:00:00Z',
-        },
-        json: true,
-      });
-
-      expect(result).toEqual([{ json: mockResponse, pairedItem: { item: 0 } }]);
+    mockExecuteFunctions.helpers.httpRequest.mockResolvedValue({
+      trade_id: 'trade123',
+      order_id: 'order123',
+      status: 'success',
     });
+
+    const items = [{ json: {} }];
+    const result = await executeTradesOperations.call(mockExecuteFunctions, items);
+
+    expect(mockExecuteFunctions.helpers.httpRequest).toHaveBeenCalledWith({
+      method: 'POST',
+      url: 'https://api.immutable.com/v1/trades',
+      headers: {
+        'Authorization': 'Bearer test-key',
+        'Content-Type': 'application/json',
+      },
+      body: {
+        order_id: 'order123',
+        user: '0x1234567890123456789012345678901234567890',
+        fees: { fee_percentage: 2.5 },
+      },
+      json: true,
+    });
+
+    expect(result).toEqual([{
+      json: {
+        trade_id: 'trade123',
+        order_id: 'order123',
+        status: 'success',
+      },
+      pairedItem: { item: 0 },
+    }]);
   });
 
-  describe('getTrade', () => {
-    it('should get trade details successfully', async () => {
-      const mockResponse = {
-        trade_id: '123',
-        status: 'completed',
-        buyer: 'buyer-address',
-        seller: 'seller-address',
-      };
+  it('should get a trade successfully', async () => {
+    mockExecuteFunctions.getNodeParameter
+      .mockReturnValueOnce('getTrade')
+      .mockReturnValueOnce('trade123');
 
-      mockExecuteFunctions.getNodeParameter.mockImplementation((param: string) => {
-        switch (param) {
-          case 'operation': return 'getTrade';
-          case 'tradeId': return '123';
-          default: return undefined;
-        }
-      });
-
-      mockExecuteFunctions.helpers.httpRequest.mockResolvedValue(mockResponse);
-
-      const result = await executeTradesOperations.call(mockExecuteFunctions, [{ json: {} }]);
-
-      expect(mockExecuteFunctions.helpers.httpRequest).toHaveBeenCalledWith({
-        method: 'GET',
-        url: 'https://api.immutable.com/v1/trades/123',
-        headers: {
-          'Authorization': 'Bearer test-api-key',
-        },
-        json: true,
-      });
-
-      expect(result).toEqual([{ json: mockResponse, pairedItem: { item: 0 } }]);
+    mockExecuteFunctions.helpers.httpRequest.mockResolvedValue({
+      trade_id: 'trade123',
+      user: '0x1234567890123456789012345678901234567890',
+      status: 'completed',
     });
+
+    const items = [{ json: {} }];
+    const result = await executeTradesOperations.call(mockExecuteFunctions, items);
+
+    expect(mockExecuteFunctions.helpers.httpRequest).toHaveBeenCalledWith({
+      method: 'GET',
+      url: 'https://api.immutable.com/v1/trades/trade123',
+      headers: {
+        'Authorization': 'Bearer test-key',
+      },
+      json: true,
+    });
+
+    expect(result).toEqual([{
+      json: {
+        trade_id: 'trade123',
+        user: '0x1234567890123456789012345678901234567890',
+        status: 'completed',
+      },
+      pairedItem: { item: 0 },
+    }]);
   });
 
-  describe('listTrades', () => {
-    it('should list trades with filters successfully', async () => {
-      const mockResponse = {
+  it('should list trades successfully', async () => {
+    mockExecuteFunctions.getNodeParameter
+      .mockReturnValueOnce('listTrades')
+      .mockReturnValue('');
+    mockExecuteFunctions.getNodeParameter
+      .mockReturnValueOnce('listTrades')
+      .mockReturnValueOnce(100)
+      .mockReturnValueOnce('cursor123')
+      .mockReturnValue('');
+
+    mockExecuteFunctions.helpers.httpRequest.mockResolvedValue({
+      result: [
+        { trade_id: 'trade1', status: 'completed' },
+        { trade_id: 'trade2', status: 'pending' },
+      ],
+      cursor: 'next_cursor',
+    });
+
+    const items = [{ json: {} }];
+    const result = await executeTradesOperations.call(mockExecuteFunctions, items);
+
+    expect(result).toEqual([{
+      json: {
         result: [
-          { trade_id: '123', status: 'completed' },
-          { trade_id: '456', status: 'pending' },
+          { trade_id: 'trade1', status: 'completed' },
+          { trade_id: 'trade2', status: 'pending' },
         ],
-        cursor: 'next-cursor',
-      };
-
-      mockExecuteFunctions.getNodeParameter.mockImplementation((param: string) => {
-        switch (param) {
-          case 'operation': return 'listTrades';
-          case 'partyATokenAddress': return '0x123';
-          case 'partyBTokenAddress': return '0x456';
-          case 'pageSize': return 50;
-          case 'cursor': return 'cursor-123';
-          case 'minTimestamp': return '2023-01-01T00:00:00Z';
-          case 'maxTimestamp': return '2023-12-31T23:59:59Z';
-          default: return undefined;
-        }
-      });
-
-      mockExecuteFunctions.helpers.httpRequest.mockResolvedValue(mockResponse);
-
-      const result = await executeTradesOperations.call(mockExecuteFunctions, [{ json: {} }]);
-
-      expect(mockExecuteFunctions.helpers.httpRequest).toHaveBeenCalledWith({
-        method: 'GET',
-        url: 'https://api.immutable.com/v1/trades?party_a_token_address=0x123&party_b_token_address=0x456&page_size=50&cursor=cursor-123&min_timestamp=2023-01-01T00%3A00%3A00Z&max_timestamp=2023-12-31T23%3A59%3A59Z',
-        headers: {
-          'Authorization': 'Bearer test-api-key',
-        },
-        json: true,
-      });
-
-      expect(result).toEqual([{ json: mockResponse, pairedItem: { item: 0 } }]);
-    });
+        cursor: 'next_cursor',
+      },
+      pairedItem: { item: 0 },
+    }]);
   });
 
-  describe('getTradesSummary', () => {
-    it('should get trades summary successfully', async () => {
-      const mockResponse = {
-        volume: '1000000',
-        trade_count: 150,
-        average_price: '6666.67',
-        period: '24h',
-      };
+  it('should handle errors when continueOnFail is true', async () => {
+    mockExecuteFunctions.getNodeParameter.mockReturnValueOnce('getTrade');
+    mockExecuteFunctions.continueOnFail.mockReturnValue(true);
+    mockExecuteFunctions.helpers.httpRequest.mockRejectedValue(new Error('API Error'));
 
-      mockExecuteFunctions.getNodeParameter.mockImplementation((param: string) => {
-        switch (param) {
-          case 'operation': return 'getTradesSummary';
-          case 'collection': return '0x789';
-          case 'period': return '24h';
-          default: return undefined;
-        }
-      });
+    const items = [{ json: {} }];
+    const result = await executeTradesOperations.call(mockExecuteFunctions, items);
 
-      mockExecuteFunctions.helpers.httpRequest.mockResolvedValue(mockResponse);
-
-      const result = await executeTradesOperations.call(mockExecuteFunctions, [{ json: {} }]);
-
-      expect(mockExecuteFunctions.helpers.httpRequest).toHaveBeenCalledWith({
-        method: 'GET',
-        url: 'https://api.immutable.com/v1/trades/summary?collection=0x789&period=24h',
-        headers: {
-          'Authorization': 'Bearer test-api-key',
-        },
-        json: true,
-      });
-
-      expect(result).toEqual([{ json: mockResponse, pairedItem: { item: 0 } }]);
-    });
+    expect(result).toEqual([{
+      json: { error: 'API Error' },
+      pairedItem: { item: 0 },
+    }]);
   });
 
-  describe('error handling', () => {
-    it('should handle API errors', async () => {
-      mockExecuteFunctions.getNodeParameter.mockImplementation((param: string) => {
-        switch (param) {
-          case 'operation': return 'getTrade';
-          case 'tradeId': return 'invalid-id';
-          default: return undefined;
-        }
-      });
+  it('should throw error when continueOnFail is false', async () => {
+    mockExecuteFunctions.getNodeParameter.mockReturnValueOnce('getTrade');
+    mockExecuteFunctions.continueOnFail.mockReturnValue(false);
+    mockExecuteFunctions.helpers.httpRequest.mockRejectedValue(new Error('API Error'));
 
-      const error = new Error('Trade not found');
-      mockExecuteFunctions.helpers.httpRequest.mockRejectedValue(error);
+    const items = [{ json: {} }];
 
-      await expect(
-        executeTradesOperations.call(mockExecuteFunctions, [{ json: {} }])
-      ).rejects.toThrow('Trade not found');
-    });
+    await expect(executeTradesOperations.call(mockExecuteFunctions, items))
+      .rejects
+      .toThrow('API Error');
+  });
 
-    it('should continue on fail when configured', async () => {
-      mockExecuteFunctions.continueOnFail.mockReturnValue(true);
-      mockExecuteFunctions.getNodeParameter.mockImplementation((param: string) => {
-        switch (param) {
-          case 'operation': return 'getTrade';
-          case 'tradeId': return 'invalid-id';
-          default: return undefined;
-        }
-      });
+  it('should throw error for unknown operation', async () => {
+    mockExecuteFunctions.getNodeParameter.mockReturnValueOnce('unknownOperation');
 
-      const error = new Error('Trade not found');
-      mockExecuteFunctions.helpers.httpRequest.mockRejectedValue(error);
+    const items = [{ json: {} }];
 
-      const result = await executeTradesOperations.call(mockExecuteFunctions, [{ json: {} }]);
-
-      expect(result).toEqual([{ json: { error: 'Trade not found' }, pairedItem: { item: 0 } }]);
-    });
+    await expect(executeTradesOperations.call(mockExecuteFunctions, items))
+      .rejects
+      .toThrow('Unknown operation: unknownOperation');
   });
 });
 
-describe('Users Resource', () => {
+describe('Transfers Resource', () => {
   let mockExecuteFunctions: any;
 
   beforeEach(() => {
     mockExecuteFunctions = {
       getNodeParameter: jest.fn(),
-      getCredentials: jest.fn().mockResolvedValue({
-        apiKey: 'test-api-key',
-        baseUrl: 'https://api.immutable.com',
+      getCredentials: jest.fn().mockResolvedValue({ 
+        apiKey: 'test-key', 
+        baseUrl: 'https://api.immutable.com/v1' 
       }),
       getInputData: jest.fn().mockReturnValue([{ json: {} }]),
       getNode: jest.fn().mockReturnValue({ name: 'Test Node' }),
       continueOnFail: jest.fn().mockReturnValue(false),
-      helpers: {
+      helpers: { 
         httpRequest: jest.fn(),
-        requestWithAuthentication: jest.fn(),
+        requestWithAuthentication: jest.fn() 
       },
     };
   });
 
-  describe('getUser', () => {
-    it('should get user profile successfully', async () => {
-      const mockResponse = {
-        user_address: '0x123...',
-        total_trades: 10,
-        total_volume: '1000.50',
-        created_at: '2024-01-01T00:00:00Z',
-      };
+  describe('createTransfer operation', () => {
+    it('should create transfer successfully', async () => {
+      mockExecuteFunctions.getNodeParameter
+        .mockReturnValueOnce('createTransfer')
+        .mockReturnValueOnce('0x123')
+        .mockReturnValueOnce('0x456')
+        .mockReturnValueOnce('ERC721')
+        .mockReturnValueOnce('1')
+        .mockReturnValueOnce('0xtoken')
+        .mockReturnValueOnce('1');
 
-      mockExecuteFunctions.getNodeParameter.mockImplementation((paramName: string, itemIndex: number) => {
-        if (paramName === 'operation') return 'getUser';
-        if (paramName === 'userAddress') return '0x123...';
-        return undefined;
-      });
-
+      const mockResponse = { transfer_id: 1, status: 'pending' };
       mockExecuteFunctions.helpers.httpRequest.mockResolvedValue(mockResponse);
 
-      const result = await executeUsersOperations.call(mockExecuteFunctions, [{ json: {} }]);
+      const result = await executeTransfersOperations.call(mockExecuteFunctions, [{ json: {} }]);
 
-      expect(mockExecuteFunctions.helpers.httpRequest).toHaveBeenCalledWith({
-        method: 'GET',
-        url: 'https://api.immutable.com/v1/users/0x123...',
-        headers: {
-          'x-api-key': 'test-api-key',
-          'Content-Type': 'application/json',
-        },
-        json: true,
-      });
       expect(result).toEqual([{ json: mockResponse, pairedItem: { item: 0 } }]);
-    });
-  });
-
-  describe('getUserBalances', () => {
-    it('should get user balances successfully', async () => {
-      const mockResponse = {
-        result: [
-          { token_address: '0xabc...', balance: '100.0', symbol: 'IMX' },
-          { token_address: '0xdef...', balance: '50.5', symbol: 'USDC' },
-        ],
-      };
-
-      mockExecuteFunctions.getNodeParameter.mockImplementation((paramName: string, itemIndex: number) => {
-        if (paramName === 'operation') return 'getUserBalances';
-        if (paramName === 'userAddress') return '0x123...';
-        return undefined;
-      });
-
-      mockExecuteFunctions.helpers.httpRequest.mockResolvedValue(mockResponse);
-
-      const result = await executeUsersOperations.call(mockExecuteFunctions, [{ json: {} }]);
-
       expect(mockExecuteFunctions.helpers.httpRequest).toHaveBeenCalledWith({
-        method: 'GET',
-        url: 'https://api.immutable.com/v1/users/0x123.../balances',
+        method: 'POST',
+        url: 'https://api.immutable.com/v1/transfers',
         headers: {
-          'x-api-key': 'test-api-key',
-          'Content-Type': 'application/json',
+          'x-api-key': 'test-key',
+          'Content-Type': 'application/json'
         },
-        json: true,
-      });
-      expect(result).toEqual([{ json: mockResponse, pairedItem: { item: 0 } }]);
-    });
-  });
-
-  describe('getUserOrders', () => {
-    it('should get user orders with filters successfully', async () => {
-      const mockResponse = {
-        result: [
-          { order_id: 1, status: 'active', amount: '10.0' },
-          { order_id: 2, status: 'active', amount: '20.0' },
-        ],
-        cursor: 'next-cursor',
-      };
-
-      mockExecuteFunctions.getNodeParameter.mockImplementation((paramName: string, itemIndex: number) => {
-        if (paramName === 'operation') return 'getUserOrders';
-        if (paramName === 'userAddress') return '0x123...';
-        if (paramName === 'status') return 'active';
-        if (paramName === 'pageSize') return 20;
-        if (paramName === 'cursor') return '';
-        return undefined;
-      });
-
-      mockExecuteFunctions.helpers.httpRequest.mockResolvedValue(mockResponse);
-
-      const result = await executeUsersOperations.call(mockExecuteFunctions, [{ json: {} }]);
-
-      expect(mockExecuteFunctions.helpers.httpRequest).toHaveBeenCalledWith({
-        method: 'GET',
-        url: 'https://api.immutable.com/v1/users/0x123.../orders?status=active&page_size=20',
-        headers: {
-          'x-api-key': 'test-api-key',
-          'Content-Type': 'application/json',
+        body: {
+          sender: '0x123',
+          receiver: '0x456',
+          token: {
+            type: 'ERC721',
+            data: {
+              token_id: '1',
+              token_address: '0xtoken',
+              quantity: '1'
+            }
+          }
         },
-        json: true,
+        json: true
       });
-      expect(result).toEqual([{ json: mockResponse, pairedItem: { item: 0 } }]);
-    });
-  });
-
-  describe('getUserTrades', () => {
-    it('should get user trades successfully', async () => {
-      const mockResponse = {
-        result: [
-          { trade_id: 1, amount: '10.0', timestamp: '2024-01-01T00:00:00Z' },
-          { trade_id: 2, amount: '15.5', timestamp: '2024-01-02T00:00:00Z' },
-        ],
-        cursor: 'next-cursor',
-      };
-
-      mockExecuteFunctions.getNodeParameter.mockImplementation((paramName: string, itemIndex: number) => {
-        if (paramName === 'operation') return 'getUserTrades';
-        if (paramName === 'userAddress') return '0x123...';
-        if (paramName === 'pageSize') return 20;
-        if (paramName === 'cursor') return '';
-        return undefined;
-      });
-
-      mockExecuteFunctions.helpers.httpRequest.mockResolvedValue(mockResponse);
-
-      const result = await executeUsersOperations.call(mockExecuteFunctions, [{ json: {} }]);
-
-      expect(mockExecuteFunctions.helpers.httpRequest).toHaveBeenCalledWith({
-        method: 'GET',
-        url: 'https://api.immutable.com/v1/users/0x123.../trades?page_size=20',
-        headers: {
-          'x-api-key': 'test-api-key',
-          'Content-Type': 'application/json',
-        },
-        json: true,
-      });
-      expect(result).toEqual([{ json: mockResponse, pairedItem: { item: 0 } }]);
-    });
-  });
-
-  describe('getUserNFTs', () => {
-    it('should get user NFTs with collection filter successfully', async () => {
-      const mockResponse = {
-        result: [
-          { token_id: '1', collection_address: '0xcollection...', name: 'NFT #1' },
-          { token_id: '2', collection_address: '0xcollection...', name: 'NFT #2' },
-        ],
-        cursor: 'next-cursor',
-      };
-
-      mockExecuteFunctions.getNodeParameter.mockImplementation((paramName: string, itemIndex: number) => {
-        if (paramName === 'operation') return 'getUserNFTs';
-        if (paramName === 'userAddress') return '0x123...';
-        if (paramName === 'collection') return '0xcollection...';
-        if (paramName === 'pageSize') return 20;
-        if (paramName === 'cursor') return '';
-        return undefined;
-      });
-
-      mockExecuteFunctions.helpers.httpRequest.mockResolvedValue(mockResponse);
-
-      const result = await executeUsersOperations.call(mockExecuteFunctions, [{ json: {} }]);
-
-      expect(mockExecuteFunctions.helpers.httpRequest).toHaveBeenCalledWith({
-        method: 'GET',
-        url: 'https://api.immutable.com/v1/users/0x123.../nfts?collection=0xcollection...&page_size=20',
-        headers: {
-          'x-api-key': 'test-api-key',
-          'Content-Type': 'application/json',
-        },
-        json: true,
-      });
-      expect(result).toEqual([{ json: mockResponse, pairedItem: { item: 0 } }]);
-    });
-  });
-
-  describe('error handling', () => {
-    it('should handle API errors properly', async () => {
-      const mockError = {
-        httpCode: 404,
-        message: 'User not found',
-      };
-
-      mockExecuteFunctions.getNodeParameter.mockImplementation((paramName: string, itemIndex: number) => {
-        if (paramName === 'operation') return 'getUser';
-        if (paramName === 'userAddress') return '0xinvalid...';
-        return undefined;
-      });
-
-      mockExecuteFunctions.helpers.httpRequest.mockRejectedValue(mockError);
-
-      await expect(executeUsersOperations.call(mockExecuteFunctions, [{ json: {} }])).rejects.toThrow();
     });
 
-    it('should continue on fail when configured', async () => {
-      const mockError = new Error('API Error');
+    it('should handle errors in createTransfer', async () => {
+      mockExecuteFunctions.getNodeParameter.mockReturnValueOnce('createTransfer');
+      mockExecuteFunctions.helpers.httpRequest.mockRejectedValue(new Error('API Error'));
       mockExecuteFunctions.continueOnFail.mockReturnValue(true);
 
-      mockExecuteFunctions.getNodeParameter.mockImplementation((paramName: string, itemIndex: number) => {
-        if (paramName === 'operation') return 'getUser';
-        if (paramName === 'userAddress') return '0xinvalid...';
-        return undefined;
+      const result = await executeTransfersOperations.call(mockExecuteFunctions, [{ json: {} }]);
+
+      expect(result).toEqual([{ json: { error: 'API Error' }, pairedItem: { item: 0 } }]);
+    });
+  });
+
+  describe('getTransfer operation', () => {
+    it('should get transfer successfully', async () => {
+      mockExecuteFunctions.getNodeParameter
+        .mockReturnValueOnce('getTransfer')
+        .mockReturnValueOnce('123');
+
+      const mockResponse = { id: 123, status: 'completed' };
+      mockExecuteFunctions.helpers.httpRequest.mockResolvedValue(mockResponse);
+
+      const result = await executeTransfersOperations.call(mockExecuteFunctions, [{ json: {} }]);
+
+      expect(result).toEqual([{ json: mockResponse, pairedItem: { item: 0 } }]);
+      expect(mockExecuteFunctions.helpers.httpRequest).toHaveBeenCalledWith({
+        method: 'GET',
+        url: 'https://api.immutable.com/v1/transfers/123',
+        headers: {
+          'x-api-key': 'test-key'
+        },
+        json: true
       });
+    });
 
-      mockExecuteFunctions.helpers.httpRequest.mockRejectedValue(mockError);
+    it('should handle errors in getTransfer', async () => {
+      mockExecuteFunctions.getNodeParameter.mockReturnValueOnce('getTransfer');
+      mockExecuteFunctions.helpers.httpRequest.mockRejectedValue(new Error('Transfer not found'));
+      mockExecuteFunctions.continueOnFail.mockReturnValue(true);
 
-      const result = await executeUsersOperations.call(mockExecuteFunctions, [{ json: {} }]);
+      const result = await executeTransfersOperations.call(mockExecuteFunctions, [{ json: {} }]);
+
+      expect(result).toEqual([{ json: { error: 'Transfer not found' }, pairedItem: { item: 0 } }]);
+    });
+  });
+
+  describe('listTransfers operation', () => {
+    it('should list transfers successfully', async () => {
+      mockExecuteFunctions.getNodeParameter
+        .mockReturnValueOnce('listTransfers')
+        .mockReturnValue('');
+
+      const mockResponse = { result: [], cursor: null };
+      mockExecuteFunctions.helpers.httpRequest.mockResolvedValue(mockResponse);
+
+      const result = await executeTransfersOperations.call(mockExecuteFunctions, [{ json: {} }]);
+
+      expect(result).toEqual([{ json: mockResponse, pairedItem: { item: 0 } }]);
+      expect(mockExecuteFunctions.helpers.httpRequest).toHaveBeenCalledWith({
+        method: 'GET',
+        url: 'https://api.immutable.com/v1/transfers',
+        headers: {
+          'x-api-key': 'test-key'
+        },
+        qs: {},
+        json: true
+      });
+    });
+
+    it('should handle errors in listTransfers', async () => {
+      mockExecuteFunctions.getNodeParameter.mockReturnValueOnce('listTransfers');
+      mockExecuteFunctions.helpers.httpRequest.mockRejectedValue(new Error('API Error'));
+      mockExecuteFunctions.continueOnFail.mockReturnValue(true);
+
+      const result = await executeTransfersOperations.call(mockExecuteFunctions, [{ json: {} }]);
 
       expect(result).toEqual([{ json: { error: 'API Error' }, pairedItem: { item: 0 } }]);
     });
   });
 });
 
-describe('Projects Resource', () => {
+describe('Users Resource', () => {
   let mockExecuteFunctions: any;
-
+  
   beforeEach(() => {
     mockExecuteFunctions = {
       getNodeParameter: jest.fn(),
-      getCredentials: jest.fn().mockResolvedValue({
-        apiKey: 'test-api-key',
-        baseUrl: 'https://api.immutable.com',
+      getCredentials: jest.fn().mockResolvedValue({ 
+        apiKey: 'test-key', 
+        baseUrl: 'https://api.immutable.com/v1' 
       }),
       getInputData: jest.fn().mockReturnValue([{ json: {} }]),
       getNode: jest.fn().mockReturnValue({ name: 'Test Node' }),
       continueOnFail: jest.fn().mockReturnValue(false),
-      helpers: {
+      helpers: { 
         httpRequest: jest.fn(),
-        requestWithAuthentication: jest.fn(),
+        requestWithAuthentication: jest.fn() 
       },
     };
   });
-
-  describe('createProject', () => {
-    it('should create a new project successfully', async () => {
-      const mockResponse = {
-        id: 'project-123',
-        name: 'Test Game',
-        company_name: 'Test Company',
-        contact_email: 'test@example.com',
-      };
-
-      mockExecuteFunctions.getNodeParameter.mockImplementation((param: string) => {
-        switch (param) {
-          case 'operation': return 'createProject';
-          case 'name': return 'Test Game';
-          case 'company_name': return 'Test Company';
-          case 'contact_email': return 'test@example.com';
-          default: return '';
-        }
-      });
-
-      mockExecuteFunctions.helpers.httpRequest.mockResolvedValue(mockResponse);
-
-      const result = await executeProjectsOperations.call(mockExecuteFunctions, [{ json: {} }]);
-
-      expect(result).toEqual([{ json: mockResponse, pairedItem: { item: 0 } }]);
-      expect(mockExecuteFunctions.helpers.httpRequest).toHaveBeenCalledWith({
-        method: 'POST',
-        url: 'https://api.immutable.com/v1/projects',
-        headers: {
-          'x-api-key': 'test-api-key',
-          'Content-Type': 'application/json',
-        },
-        body: {
-          name: 'Test Game',
-          company_name: 'Test Company',
-          contact_email: 'test@example.com',
-        },
-        json: true,
-      });
+  
+  test('should register user successfully', async () => {
+    mockExecuteFunctions.getNodeParameter
+      .mockReturnValueOnce('registerUser')
+      .mockReturnValueOnce('eth_sig_123')
+      .mockReturnValueOnce('stark_sig_456');
+    
+    mockExecuteFunctions.helpers.httpRequest.mockResolvedValue({ 
+      accounts: ['0x123'], 
+      status: 'registered' 
     });
+    
+    const result = await executeUsersOperations.call(mockExecuteFunctions, [{ json: {} }]);
+    
+    expect(mockExecuteFunctions.helpers.httpRequest).toHaveBeenCalledWith({
+      method: 'POST',
+      url: 'https://api.immutable.com/v1/users',
+      headers: {
+        'Authorization': 'Bearer test-key',
+        'Content-Type': 'application/json',
+      },
+      body: {
+        eth_signature: 'eth_sig_123',
+        stark_signature: 'stark_sig_456',
+      },
+      json: true,
+    });
+    
+    expect(result).toEqual([{ 
+      json: { accounts: ['0x123'], status: 'registered' }, 
+      pairedItem: { item: 0 } 
+    }]);
   });
-
-  describe('getProject', () => {
-    it('should get project details successfully', async () => {
-      const mockResponse = {
-        id: 'project-123',
-        name: 'Test Game',
-        company_name: 'Test Company',
-        contact_email: 'test@example.com',
-      };
-
-      mockExecuteFunctions.getNodeParameter.mockImplementation((param: string) => {
-        switch (param) {
-          case 'operation': return 'getProject';
-          case 'project_id': return 'project-123';
-          default: return '';
-        }
-      });
-
-      mockExecuteFunctions.helpers.httpRequest.mockResolvedValue(mockResponse);
-
-      const result = await executeProjectsOperations.call(mockExecuteFunctions, [{ json: {} }]);
-
-      expect(result).toEqual([{ json: mockResponse, pairedItem: { item: 0 } }]);
-      expect(mockExecuteFunctions.helpers.httpRequest).toHaveBeenCalledWith({
-        method: 'GET',
-        url: 'https://api.immutable.com/v1/projects/project-123',
-        headers: {
-          'x-api-key': 'test-api-key',
-        },
-        json: true,
-      });
+  
+  test('should get user details successfully', async () => {
+    mockExecuteFunctions.getNodeParameter
+      .mockReturnValueOnce('getUser')
+      .mockReturnValueOnce('0x123');
+    
+    mockExecuteFunctions.helpers.httpRequest.mockResolvedValue({ 
+      accounts: ['0x123'],
+      balances: [] 
     });
+    
+    const result = await executeUsersOperations.call(mockExecuteFunctions, [{ json: {} }]);
+    
+    expect(mockExecuteFunctions.helpers.httpRequest).toHaveBeenCalledWith({
+      method: 'GET',
+      url: 'https://api.immutable.com/v1/users/0x123',
+      headers: {
+        'Authorization': 'Bearer test-key',
+      },
+      json: true,
+    });
+    
+    expect(result).toEqual([{ 
+      json: { accounts: ['0x123'], balances: [] }, 
+      pairedItem: { item: 0 } 
+    }]);
   });
-
-  describe('listProjects', () => {
-    it('should list projects successfully', async () => {
-      const mockResponse = {
-        result: [
-          { id: 'project-1', name: 'Game 1' },
-          { id: 'project-2', name: 'Game 2' },
-        ],
-        cursor: 'next-cursor',
-      };
-
-      mockExecuteFunctions.getNodeParameter.mockImplementation((param: string, index: number, defaultValue?: any) => {
-        switch (param) {
-          case 'operation': return 'listProjects';
-          case 'page_size': return defaultValue || 50;
-          case 'cursor': return defaultValue || '';
-          default: return defaultValue || '';
-        }
-      });
-
-      mockExecuteFunctions.helpers.httpRequest.mockResolvedValue(mockResponse);
-
-      const result = await executeProjectsOperations.call(mockExecuteFunctions, [{ json: {} }]);
-
-      expect(result).toEqual([{ json: mockResponse, pairedItem: { item: 0 } }]);
-      expect(mockExecuteFunctions.helpers.httpRequest).toHaveBeenCalledWith({
-        method: 'GET',
-        url: 'https://api.immutable.com/v1/projects',
-        headers: {
-          'x-api-key': 'test-api-key',
-        },
-        qs: {
-          page_size: 100,
-        },
-        json: true,
-      });
+  
+  test('should get user balances successfully', async () => {
+    mockExecuteFunctions.getNodeParameter
+      .mockReturnValueOnce('getUserBalances')
+      .mockReturnValueOnce('0x123')
+      .mockReturnValueOnce(50)
+      .mockReturnValueOnce('cursor123');
+    
+    mockExecuteFunctions.helpers.httpRequest.mockResolvedValue({ 
+      result: [],
+      cursor: 'next_cursor' 
     });
+    
+    const result = await executeUsersOperations.call(mockExecuteFunctions, [{ json: {} }]);
+    
+    expect(mockExecuteFunctions.helpers.httpRequest).toHaveBeenCalledWith({
+      method: 'GET',
+      url: 'https://api.immutable.com/v1/users/0x123/balances?page_size=50&cursor=cursor123',
+      headers: {
+        'Authorization': 'Bearer test-key',
+      },
+      json: true,
+    });
+    
+    expect(result).toEqual([{ 
+      json: { result: [], cursor: 'next_cursor' }, 
+      pairedItem: { item: 0 } 
+    }]);
   });
-
-  describe('updateProject', () => {
-    it('should update project successfully', async () => {
-      const mockResponse = {
-        id: 'project-123',
-        name: 'Updated Game',
-        company_name: 'Updated Company',
-        contact_email: 'updated@example.com',
-      };
-
-      mockExecuteFunctions.getNodeParameter.mockImplementation((param: string, index: number, defaultValue?: any) => {
-        switch (param) {
-          case 'operation': return 'updateProject';
-          case 'project_id': return 'project-123';
-          case 'name': return 'Updated Game';
-          case 'company_name': return 'Updated Company';
-          case 'contact_email': return 'updated@example.com';
-          default: return defaultValue || '';
-        }
-      });
-
-      mockExecuteFunctions.helpers.httpRequest.mockResolvedValue(mockResponse);
-
-      const result = await executeProjectsOperations.call(mockExecuteFunctions, [{ json: {} }]);
-
-      expect(result).toEqual([{ json: mockResponse, pairedItem: { item: 0 } }]);
-      expect(mockExecuteFunctions.helpers.httpRequest).toHaveBeenCalledWith({
-        method: 'PUT',
-        url: 'https://api.immutable.com/v1/projects/project-123',
-        headers: {
-          'x-api-key': 'test-api-key',
-          'Content-Type': 'application/json',
-        },
-        body: {
-          name: 'Updated Game',
-          company_name: 'Updated Company',
-          contact_email: 'updated@example.com',
-        },
-        json: true,
-      });
+  
+  test('should get user assets successfully', async () => {
+    mockExecuteFunctions.getNodeParameter
+      .mockReturnValueOnce('getUserAssets')
+      .mockReturnValueOnce('0x123')
+      .mockReturnValueOnce(25)
+      .mockReturnValueOnce('')
+      .mockReturnValueOnce('imx')
+      .mockReturnValueOnce('TestNFT')
+      .mockReturnValueOnce('')
+      .mockReturnValueOnce('created_at')
+      .mockReturnValueOnce('desc')
+      .mockReturnValueOnce('0x456')
+      .mockReturnValueOnce('2023-01-01T00:00:00Z');
+    
+    mockExecuteFunctions.helpers.httpRequest.mockResolvedValue({ 
+      result: [],
+      cursor: 'assets_cursor' 
     });
+    
+    const result = await executeUsersOperations.call(mockExecuteFunctions, [{ json: {} }]);
+    
+    expect(mockExecuteFunctions.helpers.httpRequest).toHaveBeenCalledWith({
+      method: 'GET',
+      url: 'https://api.immutable.com/v1/users/0x123/assets?page_size=25&status=imx&name=TestNFT&order_by=created_at&direction=desc&collection=0x456&updated_min_timestamp=2023-01-01T00%3A00%3A00Z',
+      headers: {
+        'Authorization': 'Bearer test-key',
+      },
+      json: true,
+    });
+    
+    expect(result).toEqual([{ 
+      json: { result: [], cursor: 'assets_cursor' }, 
+      pairedItem: { item: 0 } 
+    }]);
   });
-
-  describe('getProjectCollections', () => {
-    it('should get project collections successfully', async () => {
-      const mockResponse = {
-        result: [
-          { collection_address: '0x123', name: 'Collection 1' },
-          { collection_address: '0x456', name: 'Collection 2' },
-        ],
-        cursor: 'next-cursor',
-      };
-
-      mockExecuteFunctions.getNodeParameter.mockImplementation((param: string, index: number, defaultValue?: any) => {
-        switch (param) {
-          case 'operation': return 'getProjectCollections';
-          case 'project_id': return 'project-123';
-          case 'page_size': return defaultValue || 100;
-          case 'cursor': return defaultValue || '';
-          default: return defaultValue || '';
-        }
-      });
-
-      mockExecuteFunctions.helpers.httpRequest.mockResolvedValue(mockResponse);
-
-      const result = await executeProjectsOperations.call(mockExecuteFunctions, [{ json: {} }]);
-
-      expect(result).toEqual([{ json: mockResponse, pairedItem: { item: 0 } }]);
-      expect(mockExecuteFunctions.helpers.httpRequest).toHaveBeenCalledWith({
-        method: 'GET',
-        url: 'https://api.immutable.com/v1/projects/project-123/collections',
-        headers: {
-          'x-api-key': 'test-api-key',
-        },
-        qs: {
-          page_size: 100,
-        },
-        json: true,
-      });
-    });
+  
+  test('should handle errors when continue on fail is enabled', async () => {
+    mockExecuteFunctions.getNodeParameter.mockReturnValueOnce('getUser');
+    mockExecuteFunctions.continueOnFail.mockReturnValue(true);
+    mockExecuteFunctions.helpers.httpRequest.mockRejectedValue(new Error('API Error'));
+    
+    const result = await executeUsersOperations.call(mockExecuteFunctions, [{ json: {} }]);
+    
+    expect(result).toEqual([{ 
+      json: { error: 'API Error' }, 
+      pairedItem: { item: 0 } 
+    }]);
   });
-
-  describe('error handling', () => {
-    it('should handle API errors properly', async () => {
-      const mockError = new Error('API Error');
-      mockError.httpCode = 400;
-
-      mockExecuteFunctions.getNodeParameter.mockImplementation((param: string) => {
-        switch (param) {
-          case 'operation': return 'getProject';
-          case 'project_id': return 'invalid-id';
-          default: return '';
-        }
-      });
-
-      mockExecuteFunctions.helpers.httpRequest.mockRejectedValue(mockError);
-
-      await expect(executeProjectsOperations.call(mockExecuteFunctions, [{ json: {} }])).rejects.toThrow('API Error');
-    });
-
-    it('should continue on fail when configured', async () => {
-      const mockError = new Error('API Error');
-      
-      mockExecuteFunctions.continueOnFail.mockReturnValue(true);
-      mockExecuteFunctions.getNodeParameter.mockImplementation((param: string) => {
-        switch (param) {
-          case 'operation': return 'getProject';
-          case 'project_id': return 'invalid-id';
-          default: return '';
-        }
-      });
-
-      mockExecuteFunctions.helpers.httpRequest.mockRejectedValue(mockError);
-
-      const result = await executeProjectsOperations.call(mockExecuteFunctions, [{ json: {} }]);
-
-      expect(result).toEqual([{
-        json: { error: 'API Error' },
-        pairedItem: { item: 0 }
-      }]);
-    });
+  
+  test('should throw error when continue on fail is disabled', async () => {
+    mockExecuteFunctions.getNodeParameter.mockReturnValueOnce('getUser');
+    mockExecuteFunctions.continueOnFail.mockReturnValue(false);
+    mockExecuteFunctions.helpers.httpRequest.mockRejectedValue(new Error('API Error'));
+    
+    await expect(executeUsersOperations.call(mockExecuteFunctions, [{ json: {} }]))
+      .rejects.toThrow('API Error');
   });
 });
 
 describe('Withdrawals Resource', () => {
-  let mockExecuteFunctions: any;
+	let mockExecuteFunctions: any;
 
-  beforeEach(() => {
-    mockExecuteFunctions = {
-      getNodeParameter: jest.fn(),
-      getCredentials: jest.fn().mockResolvedValue({
-        apiKey: 'test-api-key',
-        baseUrl: 'https://api.immutable.com',
-      }),
-      getInputData: jest.fn().mockReturnValue([{ json: {} }]),
-      getNode: jest.fn().mockReturnValue({ name: 'Test Node' }),
-      continueOnFail: jest.fn().mockReturnValue(false),
-      helpers: {
-        httpRequest: jest.fn(),
-        requestWithAuthentication: jest.fn(),
-      },
-    };
-  });
+	beforeEach(() => {
+		mockExecuteFunctions = {
+			getNodeParameter: jest.fn(),
+			getCredentials: jest.fn().mockResolvedValue({
+				apiKey: 'test-key',
+				baseUrl: 'https://api.immutable.com/v1',
+			}),
+			getInputData: jest.fn().mockReturnValue([{ json: {} }]),
+			getNode: jest.fn().mockReturnValue({ name: 'Test Node' }),
+			continueOnFail: jest.fn().mockReturnValue(false),
+			helpers: {
+				httpRequest: jest.fn(),
+				requestWithAuthentication: jest.fn(),
+			},
+		};
+	});
 
-  describe('createWithdrawal', () => {
-    it('should create withdrawal successfully', async () => {
-      mockExecuteFunctions.getNodeParameter.mockImplementation((param: string) => {
-        const params: any = {
-          operation: 'createWithdrawal',
-          type: 'ETH',
-          amount: '1000000000000000000',
-          tokenAddress: '0x123',
-          starkSignature: 'signature123',
-        };
-        return params[param];
-      });
+	describe('createWithdrawal', () => {
+		it('should create withdrawal successfully', async () => {
+			const mockResponse = { id: 'withdrawal-123', status: 'pending' };
+			mockExecuteFunctions.helpers.httpRequest.mockResolvedValue(mockResponse);
+			mockExecuteFunctions.getNodeParameter
+				.mockReturnValueOnce('createWithdrawal')
+				.mockReturnValueOnce('0x123')
+				.mockReturnValueOnce('ETH')
+				.mockReturnValueOnce('')
+				.mockReturnValueOnce('')
+				.mockReturnValueOnce('1000000000000000000');
 
-      const mockResponse = {
-        withdrawal_id: 'withdrawal123',
-        status: 'pending',
-      };
+			const result = await executeWithdrawalsOperations.call(
+				mockExecuteFunctions,
+				[{ json: {} }],
+			);
 
-      mockExecuteFunctions.helpers.httpRequest.mockResolvedValue(mockResponse);
+			expect(result).toEqual([
+				{
+					json: mockResponse,
+					pairedItem: { item: 0 },
+				},
+			]);
+		});
 
-      const result = await executeWithdrawalsOperations.call(mockExecuteFunctions, [{ json: {} }]);
+		it('should handle create withdrawal error', async () => {
+			const error = new Error('API Error');
+			mockExecuteFunctions.helpers.httpRequest.mockRejectedValue(error);
+			mockExecuteFunctions.getNodeParameter.mockReturnValue('createWithdrawal');
+			mockExecuteFunctions.continueOnFail.mockReturnValue(true);
 
-      expect(result[0].json).toEqual(mockResponse);
-      expect(mockExecuteFunctions.helpers.httpRequest).toHaveBeenCalledWith({
-        method: 'POST',
-        url: 'https://api.immutable.com/v1/withdrawals',
-        headers: {
-          'Authorization': 'Bearer test-api-key',
-          'Content-Type': 'application/json',
-        },
-        body: {
-          type: 'ETH',
-          amount: '1000000000000000000',
-          token_address: '0x123',
-          stark_signature: 'signature123',
-        },
-        json: true,
-      });
-    });
+			const result = await executeWithdrawalsOperations.call(
+				mockExecuteFunctions,
+				[{ json: {} }],
+			);
 
-    it('should handle createWithdrawal error', async () => {
-      mockExecuteFunctions.getNodeParameter.mockReturnValue('createWithdrawal');
-      mockExecuteFunctions.helpers.httpRequest.mockRejectedValue(new Error('API Error'));
+			expect(result).toEqual([
+				{
+					json: { error: 'API Error' },
+					pairedItem: { item: 0 },
+				},
+			]);
+		});
+	});
 
-      await expect(executeWithdrawalsOperations.call(mockExecuteFunctions, [{ json: {} }])).rejects.toThrow('API Error');
-    });
-  });
+	describe('getWithdrawal', () => {
+		it('should get withdrawal successfully', async () => {
+			const mockResponse = { id: 'withdrawal-123', user: '0x123', status: 'completed' };
+			mockExecuteFunctions.helpers.httpRequest.mockResolvedValue(mockResponse);
+			mockExecuteFunctions.getNodeParameter
+				.mockReturnValueOnce('getWithdrawal')
+				.mockReturnValueOnce('withdrawal-123');
 
-  describe('getWithdrawal', () => {
-    it('should get withdrawal successfully', async () => {
-      mockExecuteFunctions.getNodeParameter.mockImplementation((param: string) => {
-        const params: any = {
-          operation: 'getWithdrawal',
-          withdrawalId: 'withdrawal123',
-        };
-        return params[param];
-      });
+			const result = await executeWithdrawalsOperations.call(
+				mockExecuteFunctions,
+				[{ json: {} }],
+			);
 
-      const mockResponse = {
-        withdrawal_id: 'withdrawal123',
-        status: 'completed',
-        amount: '1000000000000000000',
-      };
+			expect(result).toEqual([
+				{
+					json: mockResponse,
+					pairedItem: { item: 0 },
+				},
+			]);
+		});
+	});
 
-      mockExecuteFunctions.helpers.httpRequest.mockResolvedValue(mockResponse);
+	describe('listWithdrawals', () => {
+		it('should list withdrawals successfully', async () => {
+			const mockResponse = {
+				result: [{ id: 'withdrawal-1' }, { id: 'withdrawal-2' }],
+				cursor: 'next-cursor',
+			};
+			mockExecuteFunctions.helpers.httpRequest.mockResolvedValue(mockResponse);
+			mockExecuteFunctions.getNodeParameter
+				.mockReturnValueOnce('listWithdrawals')
+				.mockReturnValue('');
 
-      const result = await executeWithdrawalsOperations.call(mockExecuteFunctions, [{ json: {} }]);
+			const result = await executeWithdrawalsOperations.call(
+				mockExecuteFunctions,
+				[{ json: {} }],
+			);
 
-      expect(result[0].json).toEqual(mockResponse);
-      expect(mockExecuteFunctions.helpers.httpRequest).toHaveBeenCalledWith({
-        method: 'GET',
-        url: 'https://api.immutable.com/v1/withdrawals/withdrawal123',
-        headers: {
-          'Authorization': 'Bearer test-api-key',
-        },
-        json: true,
-      });
-    });
-  });
+			expect(result).toEqual([
+				{
+					json: mockResponse,
+					pairedItem: { item: 0 },
+				},
+			]);
+		});
+	});
 
-  describe('listWithdrawals', () => {
-    it('should list withdrawals successfully', async () => {
-      mockExecuteFunctions.getNodeParameter.mockImplementation((param: string) => {
-        const params: any = {
-          operation: 'listWithdrawals',
-          user: '0xuser123',
-          status: 'included',
-          pageSize: 50,
-          cursor: '',
-          minTimestamp: '',
-          maxTimestamp: '',
-        };
-        return params[param];
-      });
+	describe('completeWithdrawal', () => {
+		it('should complete withdrawal successfully', async () => {
+			const mockResponse = { id: 'withdrawal-123', status: 'completed' };
+			mockExecuteFunctions.helpers.httpRequest.mockResolvedValue(mockResponse);
+			mockExecuteFunctions.getNodeParameter
+				.mockReturnValueOnce('completeWithdrawal')
+				.mockReturnValueOnce('withdrawal-123');
 
-      const mockResponse = {
-        result: [
-          {
-            withdrawal_id: 'withdrawal123',
-            status: 'included',
-            amount: '1000000000000000000',
-          },
-        ],
-        cursor: 'next_cursor',
-      };
+			const result = await executeWithdrawalsOperations.call(
+				mockExecuteFunctions,
+				[{ json: {} }],
+			);
 
-      mockExecuteFunctions.helpers.httpRequest.mockResolvedValue(mockResponse);
-
-      const result = await executeWithdrawalsOperations.call(mockExecuteFunctions, [{ json: {} }]);
-
-      expect(result[0].json).toEqual(mockResponse);
-      expect(mockExecuteFunctions.helpers.httpRequest).toHaveBeenCalledWith({
-        method: 'GET',
-        url: 'https://api.immutable.com/v1/withdrawals?user=0xuser123&status=included&page_size=50',
-        headers: {
-          'Authorization': 'Bearer test-api-key',
-        },
-        json: true,
-      });
-    });
-  });
-
-  describe('getSignableWithdrawal', () => {
-    it('should get signable withdrawal successfully', async () => {
-      mockExecuteFunctions.getNodeParameter.mockImplementation((param: string) => {
-        const params: any = {
-          operation: 'getSignableWithdrawal',
-          type: 'ERC20',
-          amount: '1000000000000000000',
-          tokenAddress: '0xtoken123',
-        };
-        return params[param];
-      });
-
-      const mockResponse = {
-        signable_message: 'message_to_sign',
-        payload_hash: 'hash123',
-      };
-
-      mockExecuteFunctions.helpers.httpRequest.mockResolvedValue(mockResponse);
-
-      const result = await executeWithdrawalsOperations.call(mockExecuteFunctions, [{ json: {} }]);
-
-      expect(result[0].json).toEqual(mockResponse);
-      expect(mockExecuteFunctions.helpers.httpRequest).toHaveBeenCalledWith({
-        method: 'GET',
-        url: 'https://api.immutable.com/v1/withdrawals/signable?type=ERC20&amount=1000000000000000000&token_address=0xtoken123',
-        headers: {
-          'Authorization': 'Bearer test-api-key',
-        },
-        json: true,
-      });
-    });
-  });
+			expect(result).toEqual([
+				{
+					json: mockResponse,
+					pairedItem: { item: 0 },
+				},
+			]);
+		});
+	});
 });
 });
