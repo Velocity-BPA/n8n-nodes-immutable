@@ -41,7 +41,6 @@ export class Immutable implements INodeType {
       },
     ],
     properties: [
-      // Resource selector
       {
         displayName: 'Resource',
         name: 'resource',
@@ -65,6 +64,10 @@ export class Immutable implements INodeType {
             value: 'trades',
           },
           {
+            name: 'Transfers',
+            value: 'transfers',
+          },
+          {
             name: 'Users',
             value: 'users',
           },
@@ -79,7 +82,6 @@ export class Immutable implements INodeType {
         ],
         default: 'collections',
       },
-      // Operation dropdowns per resource
 {
   displayName: 'Operation',
   name: 'operation',
@@ -255,6 +257,19 @@ export class Immutable implements INodeType {
   name: 'operation',
   type: 'options',
   noDataExpression: true,
+  displayOptions: { show: { resource: ['transfers'] } },
+  options: [
+    { name: 'Create Transfer', value: 'createTransfer', description: 'Transfer assets between users', action: 'Create a transfer' },
+    { name: 'Get Transfer', value: 'getTransfer', description: 'Get transfer details by ID', action: 'Get a transfer' },
+    { name: 'List Transfers', value: 'listTransfers', description: 'List transfers with filtering', action: 'List transfers' }
+  ],
+  default: 'createTransfer',
+},
+{
+  displayName: 'Operation',
+  name: 'operation',
+  type: 'options',
+  noDataExpression: true,
   displayOptions: {
     show: {
       resource: ['users'],
@@ -291,6 +306,8 @@ export class Immutable implements INodeType {
       description: 'Get NFTs owned by user',
       action: 'Get user NFTs',
     },
+    { name: 'Register User', value: 'registerUser', description: 'Register a new user on Immutable X', action: 'Register a user' },
+    { name: 'Get User Assets', value: 'getUserAssets', description: 'Get assets owned by user', action: 'Get user assets' }
   ],
   default: 'getUser',
 },
@@ -339,44 +356,49 @@ export class Immutable implements INodeType {
   default: 'createProject',
 },
 {
-  displayName: 'Operation',
-  name: 'operation',
-  type: 'options',
-  noDataExpression: true,
-  displayOptions: {
-    show: {
-      resource: ['withdrawals'],
-    },
-  },
-  options: [
-    {
-      name: 'Create Withdrawal',
-      value: 'createWithdrawal',
-      description: 'Initiate withdrawal to Ethereum',
-      action: 'Create withdrawal',
-    },
-    {
-      name: 'Get Withdrawal',
-      value: 'getWithdrawal',
-      description: 'Get withdrawal status',
-      action: 'Get withdrawal',
-    },
-    {
-      name: 'List Withdrawals',
-      value: 'listWithdrawals',
-      description: 'List user withdrawals',
-      action: 'List withdrawals',
-    },
-    {
-      name: 'Get Signable Withdrawal',
-      value: 'getSignableWithdrawal',
-      description: 'Get withdrawal data for signing',
-      action: 'Get signable withdrawal',
-    },
-  ],
-  default: 'createWithdrawal',
+	displayName: 'Operation',
+	name: 'operation',
+	type: 'options',
+	noDataExpression: true,
+	displayOptions: {
+		show: {
+			resource: ['withdrawals'],
+		},
+	},
+	options: [
+		{
+			name: 'Create Withdrawal',
+			value: 'createWithdrawal',
+			description: 'Initiate withdrawal to Ethereum',
+			action: 'Create withdrawal',
+		},
+		{
+			name: 'Get Withdrawal',
+			value: 'getWithdrawal',
+			description: 'Get withdrawal status',
+			action: 'Get withdrawal',
+		},
+		{
+			name: 'List Withdrawals',
+			value: 'listWithdrawals',
+			description: 'List user withdrawals',
+			action: 'List withdrawals',
+		},
+		{
+			name: 'Get Signable Withdrawal',
+			value: 'getSignableWithdrawal',
+			description: 'Get withdrawal data for signing',
+			action: 'Get signable withdrawal',
+		},
+		{
+			name: 'Complete Withdrawal',
+			value: 'completeWithdrawal',
+			description: 'Complete withdrawal on Ethereum mainnet',
+			action: 'Complete withdrawal',
+		},
+	],
+	default: 'createWithdrawal',
 },
-      // Parameter definitions
 {
   displayName: 'Collection Name',
   name: 'name',
@@ -434,6 +456,24 @@ export class Immutable implements INodeType {
   description: 'The project ID for the collection',
 },
 {
+  displayName: 'Metadata API URL',
+  name: 'metadata_api_url',
+  type: 'string',
+  required: true,
+  displayOptions: { show: { resource: ['collections'], operation: ['createCollection'] } },
+  default: '',
+  description: 'Metadata API URL for the collection (must be HTTPS)',
+},
+{
+  displayName: 'Contract Address',
+  name: 'contract_address',
+  type: 'string',
+  required: true,
+  displayOptions: { show: { resource: ['collections'], operation: ['createCollection'] } },
+  default: '',
+  description: 'Smart contract address for the collection',
+},
+{
   displayName: 'Collection Address',
   name: 'collection_address',
   type: 'string',
@@ -487,43 +527,17 @@ export class Immutable implements INodeType {
   description: 'Keyword to search for in collection names',
 },
 {
-  displayName: 'Collection Name',
-  name: 'name',
-  type: 'string',
-  displayOptions: {
-    show: {
-      resource: ['collections'],
-      operation: ['updateCollection'],
-    },
-  },
-  default: '',
-  description: 'Updated name of the collection',
-},
-{
-  displayName: 'Description',
-  name: 'description',
-  type: 'string',
-  displayOptions: {
-    show: {
-      resource: ['collections'],
-      operation: ['updateCollection'],
-    },
-  },
-  default: '',
-  description: 'Updated description of the collection',
-},
-{
-  displayName: 'Collection Image URL',
-  name: 'collection_image_url',
-  type: 'string',
-  displayOptions: {
-    show: {
-      resource: ['collections'],
-      operation: ['updateCollection'],
-    },
-  },
-  default: '',
-  description: 'Updated image URL for the collection',
+  displayName: 'Order By',
+  name: 'order_by',
+  type: 'options',
+  options: [
+    { name: 'Name', value: 'name' },
+    { name: 'Created At', value: 'created_at' },
+    { name: 'Updated At', value: 'updated_at' },
+  ],
+  displayOptions: { show: { resource: ['collections'], operation: ['listCollections'] } },
+  default: 'created_at',
+  description: 'Field to order results by',
 },
 {
   displayName: 'Environment',
@@ -668,19 +682,6 @@ export class Immutable implements INodeType {
   },
   default: 100,
   description: 'Number of items per page',
-},
-{
-  displayName: 'Cursor',
-  name: 'cursor',
-  type: 'string',
-  displayOptions: {
-    show: {
-      resource: ['assets'],
-      operation: ['listAssets'],
-    },
-  },
-  default: '',
-  description: 'Pagination cursor',
 },
 {
   displayName: 'Status',
@@ -907,19 +908,6 @@ export class Immutable implements INodeType {
   description: 'Number of orders to return per page (max 200)',
 },
 {
-  displayName: 'Cursor',
-  name: 'cursor',
-  type: 'string',
-  displayOptions: {
-    show: {
-      resource: ['orders'],
-      operation: ['listOrders'],
-    },
-  },
-  default: '',
-  description: 'Cursor for pagination',
-},
-{
   displayName: 'Order ID',
   name: 'orderId',
   type: 'string',
@@ -1000,32 +988,6 @@ export class Immutable implements INodeType {
   description: 'Filter by party B token address',
 },
 {
-  displayName: 'Page Size',
-  name: 'pageSize',
-  type: 'number',
-  displayOptions: {
-    show: {
-      resource: ['trades'],
-      operation: ['listTrades'],
-    },
-  },
-  default: 100,
-  description: 'Number of trades to return per page',
-},
-{
-  displayName: 'Cursor',
-  name: 'cursor',
-  type: 'string',
-  displayOptions: {
-    show: {
-      resource: ['trades'],
-      operation: ['listTrades'],
-    },
-  },
-  default: '',
-  description: 'Cursor for pagination',
-},
-{
   displayName: 'Min Timestamp',
   name: 'minTimestamp',
   type: 'string',
@@ -1096,6 +1058,135 @@ export class Immutable implements INodeType {
   description: 'Time period for trading statistics',
 },
 {
+  displayName: 'Transfer ID',
+  name: 'transferId',
+  type: 'string',
+  required: true,
+  displayOptions: { show: { resource: ['transfers'], operation: ['getTransfer'] } },
+  default: '',
+  description: 'The ID of the transfer to retrieve',
+},
+{
+  displayName: 'Sender',
+  name: 'sender',
+  type: 'string',
+  required: true,
+  displayOptions: { show: { resource: ['transfers'], operation: ['createTransfer'] } },
+  default: '',
+  description: 'The wallet address of the sender',
+},
+{
+  displayName: 'Receiver',
+  name: 'receiver',
+  type: 'string',
+  required: true,
+  displayOptions: { show: { resource: ['transfers'], operation: ['createTransfer'] } },
+  default: '',
+  description: 'The wallet address of the receiver',
+},
+{
+  displayName: 'Token Type',
+  name: 'tokenType',
+  type: 'options',
+  required: true,
+  displayOptions: { show: { resource: ['transfers'], operation: ['createTransfer'] } },
+  options: [
+    { name: 'ERC721', value: 'ERC721' },
+    { name: 'ERC20', value: 'ERC20' },
+    { name: 'ETH', value: 'ETH' }
+  ],
+  default: 'ERC721',
+  description: 'The type of token to transfer',
+},
+{
+  displayName: 'Token ID',
+  name: 'tokenId',
+  type: 'string',
+  displayOptions: { show: { resource: ['transfers'], operation: ['createTransfer'] } },
+  default: '',
+  description: 'The ID of the token (required for ERC721)',
+},
+{
+  displayName: 'Token Address',
+  name: 'tokenAddress',
+  type: 'string',
+  displayOptions: { show: { resource: ['transfers'], operation: ['createTransfer'] } },
+  default: '',
+  description: 'The contract address of the token',
+},
+{
+  displayName: 'Quantity',
+  name: 'quantity',
+  type: 'string',
+  displayOptions: { show: { resource: ['transfers'], operation: ['createTransfer'] } },
+  default: '1',
+  description: 'The quantity to transfer',
+},
+{
+  displayName: 'Page Size',
+  name: 'pageSize',
+  type: 'number',
+  displayOptions: { show: { resource: ['transfers'], operation: ['listTransfers'] } },
+  default: 20,
+  description: 'Number of transfers to return per page',
+},
+{
+  displayName: 'Order By',
+  name: 'orderBy',
+  type: 'options',
+  displayOptions: { show: { resource: ['transfers'], operation: ['listTransfers'] } },
+  options: [
+    { name: 'Created At', value: 'created_at' },
+    { name: 'Updated At', value: 'updated_at' }
+  ],
+  default: 'created_at',
+  description: 'Field to order results by',
+},
+{
+  displayName: 'Direction',
+  name: 'direction',
+  type: 'options',
+  displayOptions: { show: { resource: ['transfers'], operation: ['listTransfers'] } },
+  options: [
+    { name: 'ASC', value: 'asc' },
+    { name: 'DESC', value: 'desc' }
+  ],
+  default: 'desc',
+  description: 'Sort direction',
+},
+{
+  displayName: 'User',
+  name: 'user',
+  type: 'string',
+  displayOptions: { show: { resource: ['transfers'], operation: ['listTransfers'] } },
+  default: '',
+  description: 'Filter by user wallet address',
+},
+{
+  displayName: 'Receiver',
+  name: 'receiverFilter',
+  type: 'string',
+  displayOptions: { show: { resource: ['transfers'], operation: ['listTransfers'] } },
+  default: '',
+  description: 'Filter by receiver wallet address',
+},
+{
+  displayName: 'Min Timestamp',
+  name: 'minTimestamp',
+  type: 'string',
+  displayOptions: { show: { resource: ['transfers'], operation: ['listTransfers'] } },
+  default: '',
+  description: 'Minimum timestamp for filtering',
+},
+{
+  displayName: 'Max Timestamp',
+  name: 'maxTimestamp',
+  type: 'string',
+  displayOptions: { show: { resource: ['transfers'], operation: ['listTransfers'] } },
+  default: '',
+  description: 'Maximum timestamp for filtering',
+},
+{
   displayName: 'User Address',
   name: 'userAddress',
   type: 'string',
@@ -1138,59 +1229,6 @@ export class Immutable implements INodeType {
   description: 'The user address to get orders for',
 },
 {
-  displayName: 'Status',
-  name: 'status',
-  type: 'options',
-  displayOptions: {
-    show: {
-      resource: ['users'],
-      operation: ['getUserOrders'],
-    },
-  },
-  options: [
-    {
-      name: 'Active',
-      value: 'active',
-    },
-    {
-      name: 'Filled',
-      value: 'filled',
-    },
-    {
-      name: 'Cancelled',
-      value: 'cancelled',
-    },
-  ],
-  default: '',
-  description: 'Filter orders by status',
-},
-{
-  displayName: 'Page Size',
-  name: 'pageSize',
-  type: 'number',
-  displayOptions: {
-    show: {
-      resource: ['users'],
-      operation: ['getUserOrders'],
-    },
-  },
-  default: 20,
-  description: 'Number of orders to return per page (max 200)',
-},
-{
-  displayName: 'Cursor',
-  name: 'cursor',
-  type: 'string',
-  displayOptions: {
-    show: {
-      resource: ['users'],
-      operation: ['getUserOrders'],
-    },
-  },
-  default: '',
-  description: 'Pagination cursor for next page of results',
-},
-{
   displayName: 'User Address',
   name: 'userAddress',
   type: 'string',
@@ -1203,32 +1241,6 @@ export class Immutable implements INodeType {
   },
   default: '',
   description: 'The user address to get trade history for',
-},
-{
-  displayName: 'Page Size',
-  name: 'pageSize',
-  type: 'number',
-  displayOptions: {
-    show: {
-      resource: ['users'],
-      operation: ['getUserTrades'],
-    },
-  },
-  default: 20,
-  description: 'Number of trades to return per page (max 200)',
-},
-{
-  displayName: 'Cursor',
-  name: 'cursor',
-  type: 'string',
-  displayOptions: {
-    show: {
-      resource: ['users'],
-      operation: ['getUserTrades'],
-    },
-  },
-  default: '',
-  description: 'Pagination cursor for next page of results',
 },
 {
   displayName: 'User Address',
@@ -1245,43 +1257,31 @@ export class Immutable implements INodeType {
   description: 'The user address to get NFTs for',
 },
 {
-  displayName: 'Collection',
-  name: 'collection',
+  displayName: 'ETH Signature',
+  name: 'ethSignature',
   type: 'string',
-  displayOptions: {
-    show: {
-      resource: ['users'],
-      operation: ['getUserNFTs'],
-    },
-  },
+  required: true,
+  displayOptions: { show: { resource: ['users'], operation: ['registerUser'] } },
   default: '',
-  description: 'Filter NFTs by collection address',
+  description: 'Ethereum signature for user registration',
 },
 {
-  displayName: 'Page Size',
-  name: 'pageSize',
-  type: 'number',
-  displayOptions: {
-    show: {
-      resource: ['users'],
-      operation: ['getUserNFTs'],
-    },
-  },
-  default: 20,
-  description: 'Number of NFTs to return per page (max 200)',
+  displayName: 'Stark Signature',
+  name: 'starkSignature',
+  type: 'string',
+  required: true,
+  displayOptions: { show: { resource: ['users'], operation: ['registerUser'] } },
+  default: '',
+  description: 'Stark signature for user registration',
 },
 {
-  displayName: 'Cursor',
-  name: 'cursor',
+  displayName: 'User',
+  name: 'user',
   type: 'string',
-  displayOptions: {
-    show: {
-      resource: ['users'],
-      operation: ['getUserNFTs'],
-    },
-  },
+  required: true,
+  displayOptions: { show: { resource: ['users'], operation: ['getUserAssets'] } },
   default: '',
-  description: 'Pagination cursor for next page of results',
+  description: 'User wallet address or ID',
 },
 {
   displayName: 'Project Name',
@@ -1340,32 +1340,6 @@ export class Immutable implements INodeType {
   description: 'The unique identifier of the project',
 },
 {
-  displayName: 'Page Size',
-  name: 'page_size',
-  type: 'number',
-  displayOptions: {
-    show: {
-      resource: ['projects'],
-      operation: ['listProjects'],
-    },
-  },
-  default: 100,
-  description: 'Number of projects to return per page (max 100)',
-},
-{
-  displayName: 'Cursor',
-  name: 'cursor',
-  type: 'string',
-  displayOptions: {
-    show: {
-      resource: ['projects'],
-      operation: ['listProjects'],
-    },
-  },
-  default: '',
-  description: 'Encoded page cursor to retrieve previous/next page',
-},
-{
   displayName: 'Project ID',
   name: 'project_id',
   type: 'string',
@@ -1378,45 +1352,6 @@ export class Immutable implements INodeType {
   },
   default: '',
   description: 'The unique identifier of the project to update',
-},
-{
-  displayName: 'Project Name',
-  name: 'name',
-  type: 'string',
-  displayOptions: {
-    show: {
-      resource: ['projects'],
-      operation: ['updateProject'],
-    },
-  },
-  default: '',
-  description: 'The updated name of the gaming project',
-},
-{
-  displayName: 'Company Name',
-  name: 'company_name',
-  type: 'string',
-  displayOptions: {
-    show: {
-      resource: ['projects'],
-      operation: ['updateProject'],
-    },
-  },
-  default: '',
-  description: 'The updated name of the company',
-},
-{
-  displayName: 'Contact Email',
-  name: 'contact_email',
-  type: 'string',
-  displayOptions: {
-    show: {
-      resource: ['projects'],
-      operation: ['updateProject'],
-    },
-  },
-  default: '',
-  description: 'The updated contact email for the project',
 },
 {
   displayName: 'Project ID',
@@ -1433,32 +1368,6 @@ export class Immutable implements INodeType {
   description: 'The unique identifier of the project',
 },
 {
-  displayName: 'Page Size',
-  name: 'page_size',
-  type: 'number',
-  displayOptions: {
-    show: {
-      resource: ['projects'],
-      operation: ['getProjectCollections'],
-    },
-  },
-  default: 100,
-  description: 'Number of collections to return per page (max 100)',
-},
-{
-  displayName: 'Cursor',
-  name: 'cursor',
-  type: 'string',
-  displayOptions: {
-    show: {
-      resource: ['projects'],
-      operation: ['getProjectCollections'],
-    },
-  },
-  default: '',
-  description: 'Encoded page cursor to retrieve previous/next page',
-},
-{
   displayName: 'Withdrawal ID',
   name: 'withdrawalId',
   type: 'string',
@@ -1466,7 +1375,7 @@ export class Immutable implements INodeType {
   displayOptions: {
     show: {
       resource: ['withdrawals'],
-      operation: ['getWithdrawal'],
+      operation: ['getWithdrawal', 'completeWithdrawal'],
     },
   },
   default: '',
@@ -1555,55 +1464,6 @@ export class Immutable implements INodeType {
   description: 'Filter by user address',
 },
 {
-  displayName: 'Status',
-  name: 'status',
-  type: 'options',
-  displayOptions: {
-    show: {
-      resource: ['withdrawals'],
-      operation: ['listWithdrawals'],
-    },
-  },
-  options: [
-    {
-      name: 'Included',
-      value: 'included',
-    },
-    {
-      name: 'Not Included',
-      value: 'not_included',
-    },
-  ],
-  default: '',
-  description: 'Filter by withdrawal status',
-},
-{
-  displayName: 'Page Size',
-  name: 'pageSize',
-  type: 'number',
-  displayOptions: {
-    show: {
-      resource: ['withdrawals'],
-      operation: ['listWithdrawals'],
-    },
-  },
-  default: 100,
-  description: 'Number of results per page',
-},
-{
-  displayName: 'Cursor',
-  name: 'cursor',
-  type: 'string',
-  displayOptions: {
-    show: {
-      resource: ['withdrawals'],
-      operation: ['listWithdrawals'],
-    },
-  },
-  default: '',
-  description: 'Cursor for pagination',
-},
-{
   displayName: 'Min Timestamp',
   name: 'minTimestamp',
   type: 'string',
@@ -1645,6 +1505,8 @@ export class Immutable implements INodeType {
         return [await executeOrdersOperations.call(this, items)];
       case 'trades':
         return [await executeTradesOperations.call(this, items)];
+      case 'transfers':
+        return [await executeTransfersOperations.call(this, items)];
       case 'users':
         return [await executeUsersOperations.call(this, items)];
       case 'projects':
@@ -2217,506 +2079,4 @@ async function executeTradesOperations(
           const queryParams: any = {};
           if (partyATokenAddress) queryParams.party_a_token_address = partyATokenAddress;
           if (partyBTokenAddress) queryParams.party_b_token_address = partyBTokenAddress;
-          if (pageSize) queryParams.page_size = pageSize;
-          if (cursor) queryParams.cursor = cursor;
-          if (minTimestamp) queryParams.min_timestamp = minTimestamp;
-          if (maxTimestamp) queryParams.max_timestamp = maxTimestamp;
-
-          const queryString = new URLSearchParams(queryParams).toString();
-          const url = queryString ? `${credentials.baseUrl}/v1/trades?${queryString}` : `${credentials.baseUrl}/v1/trades`;
-
-          const options: any = {
-            method: 'GET',
-            url,
-            headers: {
-              'Authorization': `Bearer ${credentials.apiKey}`,
-            },
-            json: true,
-          };
-
-          result = await this.helpers.httpRequest(options) as any;
-          break;
-        }
-
-        case 'getTradesSummary': {
-          const collection = this.getNodeParameter('collection', i) as string;
-          const period = this.getNodeParameter('period', i) as string;
-
-          const queryParams: any = {};
-          if (collection) queryParams.collection = collection;
-          if (period) queryParams.period = period;
-
-          const queryString = new URLSearchParams(queryParams).toString();
-          const url = queryString ? `${credentials.baseUrl}/v1/trades/summary?${queryString}` : `${credentials.baseUrl}/v1/trades/summary`;
-
-          const options: any = {
-            method: 'GET',
-            url,
-            headers: {
-              'Authorization': `Bearer ${credentials.apiKey}`,
-            },
-            json: true,
-          };
-
-          result = await this.helpers.httpRequest(options) as any;
-          break;
-        }
-
-        default:
-          throw new NodeOperationError(this.getNode(), `Unknown operation: ${operation}`);
-      }
-
-      returnData.push({ json: result, pairedItem: { item: i } });
-    } catch (error: any) {
-      if (this.continueOnFail()) {
-        returnData.push({ json: { error: error.message }, pairedItem: { item: i } });
-      } else {
-        if (error.httpCode) {
-          throw new NodeApiError(this.getNode(), error);
-        }
-        throw new NodeOperationError(this.getNode(), error.message);
-      }
-    }
-  }
-
-  return returnData;
-}
-
-async function executeUsersOperations(
-  this: IExecuteFunctions,
-  items: INodeExecutionData[],
-): Promise<INodeExecutionData[]> {
-  const returnData: INodeExecutionData[] = [];
-  const operation = this.getNodeParameter('operation', 0) as string;
-  const credentials = await this.getCredentials('immutableApi') as any;
-
-  for (let i = 0; i < items.length; i++) {
-    try {
-      let result: any;
-
-      switch (operation) {
-        case 'getUser': {
-          const userAddress = this.getNodeParameter('userAddress', i) as string;
-          
-          const options: any = {
-            method: 'GET',
-            url: `${credentials.baseUrl}/v1/users/${userAddress}`,
-            headers: {
-              'x-api-key': credentials.apiKey,
-              'Content-Type': 'application/json',
-            },
-            json: true,
-          };
-
-          result = await this.helpers.httpRequest(options) as any;
-          break;
-        }
-
-        case 'getUserBalances': {
-          const userAddress = this.getNodeParameter('userAddress', i) as string;
-          
-          const options: any = {
-            method: 'GET',
-            url: `${credentials.baseUrl}/v1/users/${userAddress}/balances`,
-            headers: {
-              'x-api-key': credentials.apiKey,
-              'Content-Type': 'application/json',
-            },
-            json: true,
-          };
-
-          result = await this.helpers.httpRequest(options) as any;
-          break;
-        }
-
-        case 'getUserOrders': {
-          const userAddress = this.getNodeParameter('userAddress', i) as string;
-          const status = this.getNodeParameter('status', i) as string;
-          const pageSize = this.getNodeParameter('pageSize', i) as number;
-          const cursor = this.getNodeParameter('cursor', i) as string;
-
-          const queryParams = new URLSearchParams();
-          if (status) queryParams.append('status', status);
-          if (pageSize) queryParams.append('page_size', pageSize.toString());
-          if (cursor) queryParams.append('cursor', cursor);
-
-          const queryString = queryParams.toString();
-          const url = `${credentials.baseUrl}/v1/users/${userAddress}/orders${queryString ? '?' + queryString : ''}`;
-
-          const options: any = {
-            method: 'GET',
-            url,
-            headers: {
-              'x-api-key': credentials.apiKey,
-              'Content-Type': 'application/json',
-            },
-            json: true,
-          };
-
-          result = await this.helpers.httpRequest(options) as any;
-          break;
-        }
-
-        case 'getUserTrades': {
-          const userAddress = this.getNodeParameter('userAddress', i) as string;
-          const pageSize = this.getNodeParameter('pageSize', i) as number;
-          const cursor = this.getNodeParameter('cursor', i) as string;
-
-          const queryParams = new URLSearchParams();
-          if (pageSize) queryParams.append('page_size', pageSize.toString());
-          if (cursor) queryParams.append('cursor', cursor);
-
-          const queryString = queryParams.toString();
-          const url = `${credentials.baseUrl}/v1/users/${userAddress}/trades${queryString ? '?' + queryString : ''}`;
-
-          const options: any = {
-            method: 'GET',
-            url,
-            headers: {
-              'x-api-key': credentials.apiKey,
-              'Content-Type': 'application/json',
-            },
-            json: true,
-          };
-
-          result = await this.helpers.httpRequest(options) as any;
-          break;
-        }
-
-        case 'getUserNFTs': {
-          const userAddress = this.getNodeParameter('userAddress', i) as string;
-          const collection = this.getNodeParameter('collection', i) as string;
-          const pageSize = this.getNodeParameter('pageSize', i) as number;
-          const cursor = this.getNodeParameter('cursor', i) as string;
-
-          const queryParams = new URLSearchParams();
-          if (collection) queryParams.append('collection', collection);
-          if (pageSize) queryParams.append('page_size', pageSize.toString());
-          if (cursor) queryParams.append('cursor', cursor);
-
-          const queryString = queryParams.toString();
-          const url = `${credentials.baseUrl}/v1/users/${userAddress}/nfts${queryString ? '?' + queryString : ''}`;
-
-          const options: any = {
-            method: 'GET',
-            url,
-            headers: {
-              'x-api-key': credentials.apiKey,
-              'Content-Type': 'application/json',
-            },
-            json: true,
-          };
-
-          result = await this.helpers.httpRequest(options) as any;
-          break;
-        }
-
-        default:
-          throw new NodeOperationError(this.getNode(), `Unknown operation: ${operation}`);
-      }
-
-      returnData.push({ json: result, pairedItem: { item: i } });
-    } catch (error: any) {
-      if (this.continueOnFail()) {
-        returnData.push({ json: { error: error.message }, pairedItem: { item: i } });
-      } else {
-        if (error.httpCode) {
-          throw new NodeApiError(this.getNode(), error);
-        }
-        throw new NodeOperationError(this.getNode(), error.message);
-      }
-    }
-  }
-
-  return returnData;
-}
-
-async function executeProjectsOperations(
-  this: IExecuteFunctions,
-  items: INodeExecutionData[],
-): Promise<INodeExecutionData[]> {
-  const returnData: INodeExecutionData[] = [];
-  const operation = this.getNodeParameter('operation', 0) as string;
-  const credentials = await this.getCredentials('immutableApi') as any;
-
-  for (let i = 0; i < items.length; i++) {
-    try {
-      let result: any;
-
-      switch (operation) {
-        case 'createProject': {
-          const name = this.getNodeParameter('name', i) as string;
-          const company_name = this.getNodeParameter('company_name', i) as string;
-          const contact_email = this.getNodeParameter('contact_email', i) as string;
-
-          const body: any = {
-            name,
-            company_name,
-            contact_email,
-          };
-
-          const options: any = {
-            method: 'POST',
-            url: `${credentials.baseUrl}/v1/projects`,
-            headers: {
-              'x-api-key': credentials.apiKey,
-              'Content-Type': 'application/json',
-            },
-            body,
-            json: true,
-          };
-
-          result = await this.helpers.httpRequest(options) as any;
-          break;
-        }
-
-        case 'getProject': {
-          const project_id = this.getNodeParameter('project_id', i) as string;
-
-          const options: any = {
-            method: 'GET',
-            url: `${credentials.baseUrl}/v1/projects/${project_id}`,
-            headers: {
-              'x-api-key': credentials.apiKey,
-            },
-            json: true,
-          };
-
-          result = await this.helpers.httpRequest(options) as any;
-          break;
-        }
-
-        case 'listProjects': {
-          const page_size = this.getNodeParameter('page_size', i, 100) as number;
-          const cursor = this.getNodeParameter('cursor', i, '') as string;
-
-          const qs: any = {};
-          if (page_size) qs.page_size = page_size;
-          if (cursor) qs.cursor = cursor;
-
-          const options: any = {
-            method: 'GET',
-            url: `${credentials.baseUrl}/v1/projects`,
-            headers: {
-              'x-api-key': credentials.apiKey,
-            },
-            qs,
-            json: true,
-          };
-
-          result = await this.helpers.httpRequest(options) as any;
-          break;
-        }
-
-        case 'updateProject': {
-          const project_id = this.getNodeParameter('project_id', i) as string;
-          const name = this.getNodeParameter('name', i, '') as string;
-          const company_name = this.getNodeParameter('company_name', i, '') as string;
-          const contact_email = this.getNodeParameter('contact_email', i, '') as string;
-
-          const body: any = {};
-          if (name) body.name = name;
-          if (company_name) body.company_name = company_name;
-          if (contact_email) body.contact_email = contact_email;
-
-          const options: any = {
-            method: 'PUT',
-            url: `${credentials.baseUrl}/v1/projects/${project_id}`,
-            headers: {
-              'x-api-key': credentials.apiKey,
-              'Content-Type': 'application/json',
-            },
-            body,
-            json: true,
-          };
-
-          result = await this.helpers.httpRequest(options) as any;
-          break;
-        }
-
-        case 'getProjectCollections': {
-          const project_id = this.getNodeParameter('project_id', i) as string;
-          const page_size = this.getNodeParameter('page_size', i, 100) as number;
-          const cursor = this.getNodeParameter('cursor', i, '') as string;
-
-          const qs: any = {};
-          if (page_size) qs.page_size = page_size;
-          if (cursor) qs.cursor = cursor;
-
-          const options: any = {
-            method: 'GET',
-            url: `${credentials.baseUrl}/v1/projects/${project_id}/collections`,
-            headers: {
-              'x-api-key': credentials.apiKey,
-            },
-            qs,
-            json: true,
-          };
-
-          result = await this.helpers.httpRequest(options) as any;
-          break;
-        }
-
-        default:
-          throw new NodeOperationError(this.getNode(), `Unknown operation: ${operation}`);
-      }
-
-      returnData.push({ json: result, pairedItem: { item: i } });
-
-    } catch (error: any) {
-      if (this.continueOnFail()) {
-        returnData.push({
-          json: { error: error.message },
-          pairedItem: { item: i }
-        });
-      } else {
-        if (error.httpCode) {
-          throw new NodeApiError(this.getNode(), error);
-        }
-        throw new NodeOperationError(this.getNode(), error.message);
-      }
-    }
-  }
-
-  return returnData;
-}
-
-async function executeWithdrawalsOperations(
-  this: IExecuteFunctions,
-  items: INodeExecutionData[],
-): Promise<INodeExecutionData[]> {
-  const returnData: INodeExecutionData[] = [];
-  const operation = this.getNodeParameter('operation', 0) as string;
-  const credentials = await this.getCredentials('immutableApi') as any;
-
-  for (let i = 0; i < items.length; i++) {
-    try {
-      let result: any;
-
-      switch (operation) {
-        case 'createWithdrawal': {
-          const type = this.getNodeParameter('type', i) as string;
-          const amount = this.getNodeParameter('amount', i) as string;
-          const tokenAddress = this.getNodeParameter('tokenAddress', i) as string;
-          const starkSignature = this.getNodeParameter('starkSignature', i) as string;
-
-          const body: any = {
-            type,
-            amount,
-            stark_signature: starkSignature,
-          };
-
-          if (tokenAddress) {
-            body.token_address = tokenAddress;
-          }
-
-          const options: any = {
-            method: 'POST',
-            url: `${credentials.baseUrl}/v1/withdrawals`,
-            headers: {
-              'Authorization': `Bearer ${credentials.apiKey}`,
-              'Content-Type': 'application/json',
-            },
-            body,
-            json: true,
-          };
-
-          result = await this.helpers.httpRequest(options) as any;
-          break;
-        }
-
-        case 'getWithdrawal': {
-          const withdrawalId = this.getNodeParameter('withdrawalId', i) as string;
-
-          const options: any = {
-            method: 'GET',
-            url: `${credentials.baseUrl}/v1/withdrawals/${withdrawalId}`,
-            headers: {
-              'Authorization': `Bearer ${credentials.apiKey}`,
-            },
-            json: true,
-          };
-
-          result = await this.helpers.httpRequest(options) as any;
-          break;
-        }
-
-        case 'listWithdrawals': {
-          const user = this.getNodeParameter('user', i) as string;
-          const status = this.getNodeParameter('status', i) as string;
-          const pageSize = this.getNodeParameter('pageSize', i) as number;
-          const cursor = this.getNodeParameter('cursor', i) as string;
-          const minTimestamp = this.getNodeParameter('minTimestamp', i) as string;
-          const maxTimestamp = this.getNodeParameter('maxTimestamp', i) as string;
-
-          const params = new URLSearchParams();
-          if (user) params.append('user', user);
-          if (status) params.append('status', status);
-          if (pageSize) params.append('page_size', pageSize.toString());
-          if (cursor) params.append('cursor', cursor);
-          if (minTimestamp) params.append('min_timestamp', minTimestamp);
-          if (maxTimestamp) params.append('max_timestamp', maxTimestamp);
-
-          const queryString = params.toString();
-          const url = queryString ? 
-            `${credentials.baseUrl}/v1/withdrawals?${queryString}` : 
-            `${credentials.baseUrl}/v1/withdrawals`;
-
-          const options: any = {
-            method: 'GET',
-            url,
-            headers: {
-              'Authorization': `Bearer ${credentials.apiKey}`,
-            },
-            json: true,
-          };
-
-          result = await this.helpers.httpRequest(options) as any;
-          break;
-        }
-
-        case 'getSignableWithdrawal': {
-          const type = this.getNodeParameter('type', i) as string;
-          const amount = this.getNodeParameter('amount', i) as string;
-          const tokenAddress = this.getNodeParameter('tokenAddress', i) as string;
-
-          const params = new URLSearchParams();
-          params.append('type', type);
-          params.append('amount', amount);
-          if (tokenAddress) params.append('token_address', tokenAddress);
-
-          const options: any = {
-            method: 'GET',
-            url: `${credentials.baseUrl}/v1/withdrawals/signable?${params.toString()}`,
-            headers: {
-              'Authorization': `Bearer ${credentials.apiKey}`,
-            },
-            json: true,
-          };
-
-          result = await this.helpers.httpRequest(options) as any;
-          break;
-        }
-
-        default:
-          throw new NodeOperationError(this.getNode(), `Unknown operation: ${operation}`);
-      }
-
-      returnData.push({ json: result, pairedItem: { item: i } });
-    } catch (error: any) {
-      if (this.continueOnFail()) {
-        returnData.push({ 
-          json: { error: error.message }, 
-          pairedItem: { item: i } 
-        });
-      } else {
-        if (error.httpCode) {
-          throw new NodeApiError(this.getNode(), error);
-        }
-        throw new NodeOperationError(this.getNode(), error.message);
-      }
-    }
-  }
-
-  return returnData;
-}
+          if (pageSize) query
