@@ -1,53 +1,55 @@
 {
   "name": "@velocity-bpa/n8n-nodes-immutable",
   "version": "1.0.0",
-  "description": "n8n community node for Immutable",
-  "license": "SEE LICENSE IN LICENSE.md",
-  "main": "dist/nodes/Immutable/Immutable.node.js",
+  "description": "n8n node for Immutable X integration",
+  "license": "bsl-catalog",
+  "homepage": "https://n8n.io",
+  "author": {
+    "name": "Velocity BPA",
+    "email": "support@velocitybpa.com"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/velocity-bpa/n8n-nodes-immutable.git"
+  },
   "engines": {
     "node": ">=18.0.0"
   },
   "packageManager": "pnpm@9.1.4",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "format": "prettier nodes credentials --write",
+    "lint": "eslint nodes credentials --ext .ts",
+    "lintfix": "eslint nodes credentials --ext .ts --fix",
+    "prepublishOnly": "npm run build"
+  },
   "files": [
     "dist/**/*"
   ],
-  "scripts": {
-    "build": "tsc && gulp build:icons",
-    "dev": "tsc --watch",
-    "lint": "eslint nodes credentials package.json",
-    "lintfix": "eslint nodes credentials package.json --fix",
-    "format": "prettier nodes credentials --write",
-    "test": "jest",
-    "test:coverage": "jest --coverage",
-    "prepublishOnly": "npm run build"
-  },
-  "dependencies": {
-    "axios": "^1.6.0"
+  "n8n": {
+    "n8nNodesApiVersion": 1,
+    "credentials": [
+      "dist/credentials/ImmutableApi.credentials.js"
+    ],
+    "nodes": [
+      "dist/nodes/Immutable/Immutable.node.js"
+    ]
   },
   "devDependencies": {
-    "@types/jest": "^29.5.0",
-    "@types/node": "^20.0.0",
-    "@typescript-eslint/eslint-plugin": "^7.0.0",
-    "@typescript-eslint/parser": "^7.0.0",
-    "eslint": "^8.57.0",
-    "eslint-config-prettier": "^9.1.0",
-    "eslint-plugin-prettier": "^5.1.0",
-    "gulp": "^4.0.2",
-    "gulp-rename": "^2.0.0",
-    "jest": "^29.7.0",
-    "prettier": "^3.2.0",
-    "ts-jest": "^29.1.0",
-    "typescript": "^5.4.0"
+    "@typescript-eslint/eslint-plugin": "^7.15.1",
+    "@typescript-eslint/parser": "^7.15.1",
+    "eslint": "^8.56.0",
+    "eslint-plugin-n8n-nodes-base": "^1.16.1",
+    "n8n-workflow": "*",
+    "prettier": "^3.1.0",
+    "typescript": "^5.2.2"
   },
   "peerDependencies": {
     "n8n-workflow": "*"
   },
-  "keywords": [
-    "n8n",
-    "n8n-community-node-package",
-    "immutable",
-    "nft",
-    "blockchain",
-    "zkEVM"
-  ]
+  "dependencies": {
+    "axios": "^1.6.0"
+  }
 }
