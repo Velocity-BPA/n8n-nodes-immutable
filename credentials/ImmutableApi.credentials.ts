@@ -6,8 +6,25 @@ import {
 export class ImmutableApi implements ICredentialType {
 	name = 'immutableApi';
 	displayName = 'Immutable API';
-	documentationUrl = 'https://docs.immutable.com/docs/zkEVM/api/';
+	documentationUrl = 'https://docs.immutable.com';
 	properties: INodeProperties[] = [
+		{
+			displayName: 'Environment',
+			name: 'environment',
+			type: 'options',
+			options: [
+				{
+					name: 'Sandbox',
+					value: 'sandbox',
+				},
+				{
+					name: 'Mainnet',
+					value: 'mainnet',
+				},
+			],
+			default: 'sandbox',
+			description: 'The environment to connect to',
+		},
 		{
 			displayName: 'API Key',
 			name: 'apiKey',
@@ -16,16 +33,16 @@ export class ImmutableApi implements ICredentialType {
 				password: true,
 			},
 			default: '',
+			description: 'The API key for accessing Immutable X. Get your API key from Immutable Hub.',
 			required: true,
-			description: 'The API key for Immutable API authentication. Get your API key from Immutable Hub.',
 		},
 		{
-			displayName: 'Base URL',
+			displayName: 'API Base URL',
 			name: 'baseUrl',
 			type: 'string',
-			default: 'https://api.immutable.com',
+			default: 'https://api.immutable.com/v1',
+			description: 'Base URL for the Immutable API',
 			required: true,
-			description: 'The base URL for the Immutable API',
 		},
 	];
 }
